@@ -1,0 +1,16 @@
+bundle agent test
+{
+files:
+# localdev::
+
+  "/tmp/testcf"
+    comment => "Comment",
+    perms => mog("644", "root", "root"),
+    create => "true";
+  
+  "/tmp/testcf2"
+    comment => "Comment",
+    perms => mog("644", "root", "root"),
+    action => if_elapsed(240),
+    copy_from => remote_dcp("/opt/30and30/etc/profile", "$(sys.policy_hub)");
+}

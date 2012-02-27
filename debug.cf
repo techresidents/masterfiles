@@ -1,0 +1,11 @@
+body common control  
+{
+bundlesequence => { "test" };
+}
+
+bundle agent test
+{
+reports:
+  cfengine_3::
+   "$(sys.policy_hub)";
+}
