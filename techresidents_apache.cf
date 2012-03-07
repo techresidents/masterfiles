@@ -1,0 +1,49 @@
+#Uncomment for testing: /var/cfengine/bin/cf-agent -K -v -f <full_path>
+#body common control {
+# bundlesequence => { "techresidents_apache" };
+#
+# inputs => { 
+#            "cfengine_stdlib.cf", 
+#           };
+#}
+
+
+bundle agent techresidents_apache
+{
+
+vars:
+ 
+ "masterfiles" string => "/var/cfengine/masterfiles";
+
+ "apache_ifelapsed" int => "240";
+
+files:
+  localdev::
+    "/etc/httpd/conf.d/ssl.conf"
+      comment => "Disable ssl.conf by renaming it to ssl.conf.unused",
+      action => if_elapsed("($apache_ifelapsed")),
+      rename => to("/etc/httpd/conf.d/ssl.conf.unused");
+
+    "/etc/httpd/conf/httpd.conf"
+      comment => "Install localdev apache configuration httpd.conf",
+      action => if_elapsed("($apache_ifelapsed")),
+      copy_from => remote_dcp("$(masterfiles)/env/localdev/apache/conf/httpd.conf", "$(sys.policy_hub)");
+
+    "/opt/30and30/www/localdev.com/ssl"
+      comment => "Install localdev ssl certs",
+      perms => mog("600", "root", "root"),
+      action => if_elapsed("($apache_ifelapsed")),
+      copy_from => remote_dcp("$(masterfiles)/env/localdev/apache/ssl", "$(sys.policy_hub)");
+      depth_search => recurse("inf");
+
+processes:
+  localdev::
+    "httpd"
+      comment => "Ensure httpd is running",
+      action => if_elapsed(1),
+      restart_class => "restart_httpd";
+
+commands:
+  restart_httpd::
+    "/sbin/service httpd restart";	
+}

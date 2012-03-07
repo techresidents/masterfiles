@@ -1,0 +1,97 @@
+#Uncomment for testing: /var/cfengine/bin/cf-agent -K -v -f <full_path>
+#body common control {
+# bundlesequence => { "techresidents_packages" };
+#
+# inputs => { 
+#            "cfengine_stdlib.cf", 
+#           };
+#}
+
+
+bundle agent techresidents_packages
+{
+
+vars:
+
+ "packages_ifelapsed" int => "240";
+
+ "core_packages" slist => {
+	"yum-priorities",
+	"yum-utils",
+	"vim-common",
+	"vim-minimal",
+	"vim-X11",
+	"vim-enhanced",
+	"createrepo",
+	"mkisofs",
+	"rpmdevtools",
+ };
+ 
+ "dev_packages" slist => {
+	"readline-devel",
+	"zlib-devel",
+	"gdbm-devel",
+	"sqlite-devel",
+	"bzip2-devel",
+	"openssl-devel",
+	"httpd-devel",
+	"boost-devel",
+	"git",
+	"subversion"
+ };
+
+
+ "postgres_packages" slist => {
+	"postgresql91",
+	"postgresql91-libs",
+	"postgresql91-server",
+	"postgresql91-jdbc",
+	"postgresql91-python",
+	"postgresql91-devel",
+	"postgresql91-contrib",
+	"pgpool-II-91",
+	"postgis91",
+	"pg_top91",
+	"slony1-91"
+ };
+
+ "apache_packages" slist => {
+	"mod_ssl"
+ };
+
+ "tr_packages" slist => {
+  	"techresidents_web"
+  };
+
+ "localdev_packages" slist => {
+	@(core_packages),
+	@(dev_packages),
+	@(postgres_packages),
+	@(apache_packages)
+ };
+
+
+packages:
+
+ localdev::
+  "$(localdev_packages)"
+    comment => "Install localdev packages",
+    action => if_elapsed("$(packages_ifelapsed)"),
+    package_policy => "add",
+    package_method => yum;
+  
+  "java-1"
+    comment => "Install java-1.6.0-devel",
+    action => if_elapsed("$(packages_ifelapsed)"),
+    package_policy => "add",
+    package_version => "*",
+    package_architectures => { "6.0-openjdk-devel.x86_64" },
+    package_method => yum;
+
+  "$(tr_packages)"
+    comment => "Install and update techresidents packages",
+    action => if_elapsed("$(packages_ifelapsed)"),
+    package_policy => "addupdate",
+    package_method => yum;
+
+}
