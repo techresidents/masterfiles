@@ -36,6 +36,10 @@ vars:
 	"openssl-devel",
 	"httpd-devel",
 	"boost-devel",
+    "glib2-devel",
+    "ncurses-devel",
+    "compat_libevent14-devel",
+    "tcl-devel",
 	"git",
 	"subversion"
  };
