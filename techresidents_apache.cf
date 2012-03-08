@@ -33,7 +33,7 @@ files:
       comment => "Install localdev ssl certs",
       perms => mog("600", "root", "root"),
       action => if_elapsed("$(apache_ifelapsed)"),
-      copy_from => remote_dcp("$(masterfiles)/env/localdev/apache/ssl", "$(sys.policy_hub)");
+      copy_from => remote_dcp("$(masterfiles)/env/localdev/apache/ssl", "$(sys.policy_hub)"),
       depth_search => recurse("inf");
 
 processes:
