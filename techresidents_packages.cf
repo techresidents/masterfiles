@@ -14,6 +14,7 @@ bundle agent techresidents_packages
 vars:
 
  "packages_ifelapsed" int => "240";
+ 
 
  "core_packages" slist => {
 	"yum-priorities",
@@ -36,10 +37,10 @@ vars:
 	"openssl-devel",
 	"httpd-devel",
 	"boost-devel",
-    "glib2-devel",
-    "ncurses-devel",
-    "compat-libevent14-devel",
-    "tcl-devel",
+        "glib2-devel",
+        "ncurses-devel",
+        "compat-libevent14-devel",
+        "tcl-devel",
 	"git",
 	"subversion"
  };
@@ -59,19 +60,10 @@ vars:
 	"slony1-91"
  };
 
- "apache_packages" slist => {
-	"mod_ssl"
- };
-
- "tr_packages" slist => {
-  	"techresidents_web"
-  };
-
  "localdev_packages" slist => {
 	@(core_packages),
 	@(dev_packages),
-	@(postgres_packages),
-	@(apache_packages)
+	@(postgres_packages)
  };
 
 
@@ -82,7 +74,7 @@ packages:
     comment => "Install localdev packages",
     action => if_elapsed("$(packages_ifelapsed)"),
     package_policy => "add",
-    package_method => yum;
+    package_method => yum_ifelapsed;
   
   "java-1"
     comment => "Install java-1.6.0-devel",
@@ -90,12 +82,36 @@ packages:
     package_policy => "add",
     package_version => "*",
     package_architectures => { "6.0-openjdk-devel.x86_64" },
-    package_method => yum;
+    package_method => yum_ifelapsed;
 
-  "$(tr_packages)"
-    comment => "Install and update techresidents packages",
-    action => if_elapsed("$(packages_ifelapsed)"),
-    package_policy => "addupdate",
-    package_method => yum;
+}
 
+
+body package_method yum_ifelapsed
+{
+package_changes => "bulk";
+package_list_command => "/usr/bin/yum list installed";
+package_patch_list_command => "/usr/bin/yum check-update";
+
+# Remember to escape special characters like |
+
+package_list_name_regex    => "([^.]+).*";
+package_list_version_regex => "[^\s]\s+([^\s]+).*";
+package_list_arch_regex    => "[^.]+\.([^\s]+).*";
+
+package_installed_regex => ".*(installed|\s+@).*";
+package_name_convention => "$(name).$(arch)";
+
+# set it to "0" to avoid caching of list during upgrade
+package_list_update_ifelapsed => "1";
+
+package_patch_installed_regex => "^\s.*";
+package_patch_name_regex    => "([^.]+).*";
+package_patch_version_regex => "[^\s]\s+([^\s]+).*";
+package_patch_arch_regex    => "[^.]+\.([^\s]+).*";
+
+package_add_command => "/usr/bin/yum -y install";
+package_update_command => "/usr/bin/yum -y update";
+package_delete_command => "/bin/rpm -e --nodeps";
+package_verify_command => "/bin/rpm -V";
 }
