@@ -21,18 +21,18 @@ files:
   localdev::
     "/etc/httpd/conf.d/ssl.conf"
       comment => "Disable ssl.conf by renaming it to ssl.conf.unused",
-      action => if_elapsed("($apache_ifelapsed")),
+      action => if_elapsed("$(apache_ifelapsed)"),
       rename => to("/etc/httpd/conf.d/ssl.conf.unused");
 
     "/etc/httpd/conf/httpd.conf"
       comment => "Install localdev apache configuration httpd.conf",
-      action => if_elapsed("($apache_ifelapsed")),
+      action => if_elapsed("$(apache_ifelapsed)"),
       copy_from => remote_dcp("$(masterfiles)/env/localdev/apache/conf/httpd.conf", "$(sys.policy_hub)");
 
     "/opt/30and30/www/localdev.com/ssl"
       comment => "Install localdev ssl certs",
       perms => mog("600", "root", "root"),
-      action => if_elapsed("($apache_ifelapsed")),
+      action => if_elapsed("$(apache_ifelapsed)"),
       copy_from => remote_dcp("$(masterfiles)/env/localdev/apache/ssl", "$(sys.policy_hub)");
       depth_search => recurse("inf");
 
