@@ -38,7 +38,7 @@ vars:
 	"boost-devel",
     "glib2-devel",
     "ncurses-devel",
-    "compat_libevent14-devel",
+    "compat-libevent14-devel",
     "tcl-devel",
 	"git",
 	"subversion"
