@@ -1,0 +1,62 @@
+#Uncomment for testing: /var/cfengine/bin/cf-agent -K -I -f <full_path>
+#body common control {
+# bundlesequence => { "sys_users" };
+#
+# inputs => { 
+#            "cfengine_stdlib.cf", 
+#            "globals.cf"
+#           };
+#}
+
+bundle agent sys_users
+{
+vars:
+  "passwd[30and30]" string => "30and30:x:500:500::/home/30and30:/bin/bash";
+  "passwd[jmullins]" string => "jmullins:x:501:500::/home/jmullins:/bin/bash";
+  "passwd[bmullins]" string => "bmullins:x:502:500::/home/bmullins:/bin/bash";
+  
+  "group[30and30]" string => "30and30:x:500:";
+
+  "users" slist => getindices("passwd");
+
+classes:
+ "sysgrp_cfengine" expression => classmatch("sysgrp_cfengine_.*");
+
+files:
+  sysgrp_cfengine::
+
+    "/etc/passwd"
+      classes => if_repaired("passwd_updated"),
+      edit_line => append_users_starting("sys_users.passwd");
+
+    "/etc/group"
+      edit_line => append_groups_starting("sys_users.group");
+
+    "/home/$(users)/."
+      create => "true",
+      perms => mog("755", "$(users)", "$(globals.default_group)");
+
+    "/home/$(users)/.bash_logout"
+      perms => mog("644", "$(users)", "$(globals.default_group)"),
+      copy_from => seed_cp("/etc/skel/.bash_logout");
+
+    "/home/$(users)/.bash_profile"
+      perms => mog("644", "$(users)", "$(globals.default_group)"),
+      copy_from => seed_cp("/etc/skel/.bash_profile");
+
+    "/home/$(users)/.bashrc"
+      perms => mog("644", "$(users)", "$(globals.default_group)"),
+      copy_from => seed_cp("/etc/skel/.bashrc"),
+      edit_line => append_if_no_lines("$(globals.default_profile_lines)");
+
+    "/home/$(users)/.m2/settings.xml"
+      comment => "Sync maven2 settings.xml",
+      perms => mog("644", "$(users)", "$(globals.default_group)"),
+      action => if_elapsed("$(globals.default_ifelapsed)"),
+      copy_from => remote_dcp("$(globals.masterfiles)/env/common/m2/settings.xml", "$(sys.policy_hub)");
+
+commands:
+  sysgrp_cfengine.passwd_updated::
+    #Update /etc/shadow if user was added
+    "/usr/sbin/pwconv";
+}

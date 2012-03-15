@@ -1,0 +1,21 @@
+{
+    "all" : {
+        "packages" : []
+    },
+
+    "cfengine" : {
+        "packages" : []
+    },
+
+    "web" : {
+        "packages" : ["apache", "techresidents_web"]
+    },
+
+    "database" : {
+        "packages" : ["postgresql"]
+    },
+
+    "services" : {
+        "packages" : []
+    }
+}

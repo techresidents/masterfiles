@@ -1,0 +1,51 @@
+#Uncomment for testing: /var/cfengine/bin/cf-agent -K -I -f <full_path>
+#body common control {
+# bundlesequence => { "sys_files" };
+#
+# inputs => { 
+#            "cfengine_stdlib.cf", 
+#            "globals.cf"
+#           };
+#}
+
+bundle agent sys_files
+{
+
+classes:
+ "sysgrp_cfengine" expression => classmatch("sysgrp_cfengine_.*");
+
+files:
+  sysgrp_cfengine::
+    "/etc/ld.so.conf.d"
+      comment => "Sync ldconfig ld.so.conf.d",
+      perms => mog("644", "root", "root"),
+      action => if_elapsed("$(globals.default_ifelapsed)"),
+      classes => if_repaired("ldconfig_repaired"),
+      copy_from => remote_dcp("$(globals.masterfiles)/env/common/etc/ld.so.conf.d", "$(sys.policy_hub)"),
+      depth_search => recurse("inf");
+
+    "/opt/3ps/etc"
+      comment => "Sync default profile",
+      perms => mog("644", "root", "root"),
+      action => if_elapsed("$(globals.default_ifelapsed)"),
+      copy_from => remote_dcp("$(globals.masterfiles)/env/common/opt/3ps/etc", "$(sys.policy_hub)"),
+      depth_search => recurse("inf");
+
+    "/opt/30and30/etc"
+      comment => "Sync default profile",
+      perms => mog("644", "root", "root"),
+      action => if_elapsed("$(globals.default_ifelapsed)"),
+      copy_from => remote_dcp("$(globals.masterfiles)/env/common/opt/30and30/etc", "$(sys.policy_hub)"),
+      depth_search => recurse("inf");
+
+    "/opt/30and30/bin"
+      comment => "Sync default profile",
+      perms => mog("755", "root", "root"),
+      action => if_elapsed("$(globals.default_ifelapsed)"),
+      copy_from => remote_dcp("$(globals.masterfiles)/env/common/opt/30and30/bin", "$(sys.policy_hub)"),
+      depth_search => recurse("inf");
+
+commands:
+  sysgrp_cfengine.ldconfig_repaired::
+    "/sbin/ldconfig";
+}

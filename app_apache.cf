@@ -1,0 +1,60 @@
+#Uncomment for testing: /var/cfengine/bin/cf-agent -K -I -f <full_path>
+#body common control {
+# bundlesequence => { "app_apache" };
+#
+# inputs => { 
+#            "cfengine_stdlib.cf", 
+#            "globals.cf",
+#            "sys_versions.cf"
+#           };
+#}
+
+bundle agent app_apache
+{
+
+vars:
+
+ "apache_packages" slist => {
+	"mod_ssl"
+ };
+
+classes:
+ "sysgrp_cfengine" expression => classmatch("sysgrp_cfengine_.*");
+ "apache" expression => classmatch("sysver_apache_.*");
+
+packages:
+  sysgrp_cfengine.apache::
+    "$(apache_packages)"
+      comment => "Install apache packages",
+      action => if_elapsed("$(globals.default_ifelapsed)"),
+      package_policy => "add",
+      package_method => yum_ifelapsed;
+
+methods:
+  sysgrp_cfengine.sysver_apache_localdev::
+    "any" usebundle => app_apache_conf("localdev");
+
+  sysgrp_cfengine.sysver_apache_integration::
+    "any" usebundle => app_apache_conf("integration");
+
+  sysgrp_cfengine.sysver_apache_staging::
+    "any" usebundle => app_apache_conf("staging");
+
+  sysgrp_cfengine.sysver_apache_prod::
+    "any" usebundle => app_apache_conf("prod");
+}
+
+
+bundle agent app_apache_conf(env)
+{
+files:
+    "/etc/httpd/conf.d/ssl.conf"
+      comment => "Disable ssl.conf by renaming it to ssl.conf.unused",
+      action => if_elapsed("$(globals.default_ifelapsed)"),
+      rename => to("/etc/httpd/conf.d/ssl.conf.unused");
+
+    "/etc/httpd/conf/httpd.conf"
+      comment => "Install apache configuration httpd.conf",
+      action => if_elapsed("$(globals.default_ifelapsed)"),
+      copy_from => remote_dcp("$(globals.masterfiles)/env/$(env)/apache/conf/httpd.conf", "$(sys.policy_hub)");
+}

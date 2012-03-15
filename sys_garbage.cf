@@ -1,0 +1,24 @@
+#Uncomment for testing: /var/cfengine/bin/cf-agent -K -I -f <full_path>
+#body common control {
+# bundlesequence => { "sys_garbage" };
+#
+# inputs => { 
+#            "cfengine_stdlib.cf", 
+#            "globals.cf"
+#           };
+#}
+
+bundle agent sys_garbage
+{
+
+classes:
+ "sysgrp_cfengine" expression => classmatch("sysgrp_cfengine_.*");
+
+files:
+  sysgrp_cfengine::
+    "$(sys.workdir)/outputs"
+      comment => "Removing old cfengine output files",
+      delete => tidy,
+      file_select => days_old("7"),
+      depth_search => recurse("inf");
+}

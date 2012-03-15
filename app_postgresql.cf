@@ -1,0 +1,122 @@
+#Uncomment for testing: /var/cfengine/bin/cf-agent -K -I -f <full_path>
+#body common control {
+# bundlesequence => { "app_postgresql" };
+#
+# inputs => { 
+#            "cfengine_stdlib.cf", 
+#            "globals.cf",
+#            "sys_versions.cf"
+#           };
+#}
+
+bundle agent app_postgresql
+{
+
+vars:
+ #wget http://yum.postgresql.org/9.1/redhat/rhel-5-x86_64/pgdg-centos91-9.1-4.noarch.rpm
+ "postgresql_yum_repo" string => "pgdg-centos91-9.1-4.noarch.rpm";
+ "postgresql_yum_repo_path" string => "$(globals.rpm_repo)/$(postgresql_yum_repo)";
+
+ "postgresql_packages" slist => {
+	"postgresql91",
+	"postgresql91-libs",
+	"postgresql91-server",
+	"postgresql91-jdbc",
+	"postgresql91-python",
+	"postgresql91-devel",
+	"postgresql91-contrib",
+	"pgpool-II-91",
+	"postgis91",
+	"pg_top91",
+	"slony1-91"
+ };
+
+classes:
+ "sysgrp_cfengine" expression => classmatch("sysgrp_cfengine_.*");
+ "postgresql" expression => classmatch("sysver_postgresql_.*");
+
+files:
+  sysgrp_cfengine.postgresql::
+    "$(postgresql_yum_repo_path)"
+      comment => "Sync postgrsql yum repo",
+      perms => mog("644", "root", "root"),
+      action => if_elapsed("$(globals.default_ifelapsed)"),
+      copy_from => remote_dcp("$(postgresql_yum_repo_path)", "$(sys.policy_hub)");
+
+    "/var/lib/pgsql/.bash_profile"
+      comment => "Source /opt/3ps/etc/profile in postgres bash_profile",
+      create => "false",
+      edit_line => append_if_no_lines("$(globals.default_3ps_profile_lines)");
+
+packages:
+  sysgrp_cfengine.postgresql::
+    "pgdg-centos91"
+      comment => "Install postgresql yum repo",
+      action => if_elapsed("$(globals.default_ifelapsed)"),
+      classes => if_repaired("postgresql_installed"),
+      package_policy => "add",
+      package_version => "9.1-4",
+      package_architectures => { "noarch" },
+      package_method => rpm_ifelapsed("$(globals.rpm_repo)");
+
+    "$(postgresql_packages)"
+      comment => "Install apache packages",
+      action => if_elapsed("$(globals.default_ifelapsed)"),
+      classes => if_repaired("postgresql_installed"),
+      package_policy => "add",
+      package_method => yum_ifelapsed;
+
+methods:
+  sysgrp_cfengine.sysver_postgresql_localdev::
+    "any" usebundle => app_postgresql_conf("localdev");
+
+  sysgrp_cfengine.sysver_postgresql_integration::
+    "any" usebundle => app_postgresql_conf("integration");
+
+  sysgrp_cfengine.sysver_postgresql_staging::
+    "any" usebundle => app_postgresql_conf("staging");
+
+  sysgrp_cfengine.sysver_postgresql_prod::
+    "any" usebundle => app_postgresql_conf("prod");
+
+processes:
+  sysgrp_cfengine.postgresql::
+    "postmaster"
+      comment => "Ensure postgresql is running",
+      action => if_elapsed(1),
+      restart_class => "postgresql_restart";
+
+commands:
+  sysgrp_cfengine.postgresql_installed::
+    "/sbin/service postgresql-9.1 initdb";	
+    
+  sysgrp_cfengine.postgresql_restart::
+    "/sbin/service postgresql-9.1 restart";	
+
+  sysgrp_cfengine.postgresql_installed::
+    #Wait for postgres to startup
+    "/bin/sleep 30";
+
+    "/usr/bin/sudo -u postgres /usr/pgsql-9.1/bin/psql -c \"CREATE ROLE postgres\"";
+
+    "/usr/bin/sudo -u postgres /usr/pgsql-9.1/bin/psql -c \"ALTER ROLE postgres with SUPERUSER INHERIT CREATEROLE CREATEDB LOGIN PASSWORD 'md5d567c3bd5b5af9c0b4f16da9320a0dac'\"";
+
+    "/sbin/chkconfig postgresql-9.1 on";
+}
+
+
+bundle agent app_postgresql_conf(env)
+{
+files:
+    "/var/lib/pgsql/9.1/data/postgresql.conf"
+      comment => "Install postgresql.conf",
+      perms => mog("600", "postgres", "postgres"),
+      action => if_elapsed("$(globals.default_ifelapsed)"),
+      copy_from => remote_dcp("$(globals.masterfiles)/env/$(env)/postgresql/data/postgresql.conf", "$(sys.policy_hub)");
+
+    "/var/lib/pgsql/9.1/data/pg_hba.conf"
+      comment => "Install postgresql.conf",
+      perms => mog("600", "postgres", "postgres"),
+      action => if_elapsed("$(globals.default_ifelapsed)"),
+      copy_from => remote_dcp("$(globals.masterfiles)/env/$(env)/postgresql/data/pg_hba.conf", "$(sys.policy_hub)");
+}

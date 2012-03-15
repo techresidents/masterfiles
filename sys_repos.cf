@@ -1,0 +1,78 @@
+#Uncomment for testing: /var/cfengine/bin/cf-agent -K -I -f <full_path>
+#body common control {
+# bundlesequence => { "sys_repos" };
+#
+# inputs => { 
+#            "cfengine_stdlib.cf", 
+#            "globals.cf",
+#            "sys_packages.cf"
+#           };
+#}
+
+bundle agent sys_repos
+{
+vars:
+ "repo_packages" slist => {
+	"yum-priorities",
+	"yum-utils"
+ };
+
+classes:
+ "sysgrp_cfengine" expression => classmatch("sysgrp_cfengine_.*");
+
+packages:
+  sysgrp_cfengine::
+    "$(repo_packages)"
+      comment => "Install repo packages",
+      action => if_elapsed("$(globals.default_package_ifelapsed)"),
+      classes => if_repaired("yum_installed"),
+      package_policy => "add",
+      package_method => yum_ifelapsed;
+
+    #rpm -Uvh http://dl.fedoraproject.org/pub/epel/5/i386/epel-release-5-4.noarch.rpm
+    "epel-release"
+      comment => "Install yum epel repo",
+      action => if_elapsed("$(globals.default_package_ifelapsed)"),
+      classes => if_repaired("yum_installed"),
+      package_policy => "add",
+      package_version => "5-4",
+      package_architectures => { "noarch" },
+      package_method => rpm_ifelapsed("$(globals.rpm_repo)");
+
+methods:
+  sysgrp_cfengine::
+    "any" usebundle => sys_repo_sync_yum_repos;
+
+commands:
+  sysgrp_cfengine.yum_installed::
+    "/usr/bin/yum clean all";
+    "/usr/bin/yum -y check-update";
+    "/usr/bin/yum -y update";
+}
+
+#This must be done after repos are installed, since we adjust the
+#priorities for repos like epel.
+bundle agent sys_repo_sync_yum_repos
+{
+files:
+    "/etc/yum.repos.d"
+      comment => "Sync yum repos",
+      perms => mog("644", "root", "root"),
+      action => if_elapsed("$(globals.default_ifelapsed)"),
+      copy_from => remote_dcp("$(globals.masterfiles)/env/common/etc/yum.repos.d", "$(sys.policy_hub)"),
+      depth_search => recurse("inf");
+}
+
+
+bundle agent sys_repo_sync(app, app_version, app_release, app_arch)
+{
+vars:
+  "rpm_path" string => "$(globals.rpm_repo)/$(app)-$(app_version)-$(app_release).$(app_arch).rpm";
+
+files:
+    "$(rpm_path)"
+      comment => "Sync sys repo",
+      perms => mog("644", "root", "root"),
+      action => if_elapsed("$(globals.default_ifelapsed)"),
+      copy_from => remote_dcp("$(rpm_path)", "$(sys.policy_hub)");
+}

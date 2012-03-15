@@ -1,0 +1,26 @@
+bundle common globals
+{
+vars:
+
+ "default_user" string => "500";
+ "default_group" string => "500";
+ "default_ifelapsed" int => "240";
+ "default_package_ifelapsed" int => "1";
+
+ "default_profile" string => "/opt/3ps/etc/profile";
+ "default_profile_lines" string => 
+   ". /opt/30and30/etc/profile"
+ ;
+
+ "default_3ps_profile" string => "/opt/3ps/etc/profile";
+ "default_3ps_profile_lines" string => 
+   ". /opt/3ps/etc/profile"
+ ;
+
+
+ "masterfiles" string => "/var/cfengine/masterfiles";
+ "sysutil" string => "/opt/3ps/bin/python /opt/30and30/bin/sysutil.py";
+ "rpm_repo" string => "/opt/30and30/centos/centos-5.7/rpm/repo";
+ "source_profile" string => ". $(default_profile)";
+ "source_3ps_profile" string => ". $(default_3ps_profile)";
+}
