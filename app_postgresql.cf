@@ -148,6 +148,6 @@ files:
 commands:
   #only auto-restart postgres for localdev environment
   #it's too risky in other environments.
-  sysgrp_cfengine.postgresql_localdev.postgresql_conf_repaired::
+  sysgrp_cfengine.sysver_postgresql_localdev.postgresql_conf_repaired::
     "/sbin/service postgresql-9.1 restart";	
 }
