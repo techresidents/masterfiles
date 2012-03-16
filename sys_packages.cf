@@ -41,7 +41,6 @@ vars:
 packages:
   "$(core_packages)"
     comment => "Install core packages",
-    classes => if_kept("core_packages_installed"),
     action => if_elapsed("$(globals.default_ifelapsed)"),
     package_policy => "add",
     package_method => yum_ifelapsed;
