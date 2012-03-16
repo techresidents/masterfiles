@@ -11,12 +11,23 @@
 
 bundle agent sys_packages
 {
+classes:
+ "sysgrp_cfengine" expression => classmatch("sysgrp_cfengine_.*");
 
+#packages are split into separate bundle methods since install order matters
+#cfengine will combine packages in the same promise into a single yum install command
+#which can cause issues.
+methods:
+ sysgrp_cfengine::
+    "any" usebundle => sys_pacakges_core;
+    "any" usebundle => sys_pacakges_devel;
+    "any" usebundle => sys_pacakges_java;
+    "any" usebundle => sys_pacakges_30and30;
+}
+
+bundle agent sys_packages_core
+{
 vars:
-
- "packages_ifelapsed" int => "240";
- 
-
  "core_packages" slist => {
 	"vim-common",
 	"vim-minimal",
@@ -26,7 +37,19 @@ vars:
 	"mkisofs",
 	"rpmdevtools",
  };
- 
+
+packages:
+  "$(core_packages)"
+    comment => "Install core packages",
+    classes => if_kept("core_packages_installed"),
+    action => if_elapsed("$(globals.default_ifelapsed)"),
+    package_policy => "add",
+    package_method => yum_ifelapsed;
+}
+
+bundle agent sys_packages_devel
+{
+vars:
  "dev_packages" slist => {
 	"readline-devel",
 	"zlib-devel",
@@ -44,6 +67,29 @@ vars:
 	"subversion"
  };
 
+packages:
+  "$(dev_packages)"
+    comment => "Install dev packages",
+    action => if_elapsed("$(globals.default_ifelapsed)"),
+    package_policy => "add",
+    package_method => yum_ifelapsed;
+}
+
+bundle agent sys_packages_java
+{
+packages:
+  "java-1"
+    comment => "Install java-1.6.0-devel",
+    action => if_elapsed("$(globals.default_ifelapsed)"),
+    package_policy => "add",
+    package_version => "*",
+    package_architectures => { "6.0-openjdk-devel.x86_64" },
+    package_method => yum_ifelapsed;
+}
+
+bundle agent sys_packages_30and30
+{
+vars:
  "thirty_packages" slist => {
 	"python27",
 	"python27-devel",
@@ -61,32 +107,7 @@ vars:
     "cfengine-community"
  };
 
-classes:
- "sysgrp_cfengine" expression => classmatch("sysgrp_cfengine_.*");
-
 packages:
- sysgrp_cfengine::
-  "$(core_packages)"
-    comment => "Install localdev packages",
-    action => if_elapsed("$(globals.default_ifelapsed)"),
-    package_policy => "add",
-    package_method => yum_ifelapsed;
-
- sysgrp_cfengine::
-  "$(dev_packages)"
-    comment => "Install localdev packages",
-    action => if_elapsed("$(globals.default_ifelapsed)"),
-    package_policy => "add",
-    package_method => yum_ifelapsed;
-  
-  "java-1"
-    comment => "Install java-1.6.0-devel",
-    action => if_elapsed("$(globals.default_ifelapsed)"),
-    package_policy => "add",
-    package_version => "*",
-    package_architectures => { "6.0-openjdk-devel.x86_64" },
-    package_method => yum_ifelapsed;
-
   "$(thirty_packages)"
     comment => "Install 30and30 packages",
     action => if_elapsed("$(globals.default_ifelapsed)"),
