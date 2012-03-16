@@ -17,8 +17,18 @@ vars:
 	"yum-utils"
  };
 
+ "epel_repo_rpm_path" string => "$(globals.rpm_repo)/epel-release-5-4.noarch.rpm";
+
 classes:
  "sysgrp_cfengine" expression => classmatch("sysgrp_cfengine_.*");
+
+files:
+  sysgrp_cfengine::
+    "$(epel_repo_rpm_path)"
+      comment => "Sync epel yum repo rpm",
+      perms => mog("644", "root", "root"),
+      action => if_elapsed("$(globals.default_ifelapsed)"),
+      copy_from => remote_dcp("$(epel_repo_rpm_path)", "$(sys.policy_hub)");
 
 packages:
   sysgrp_cfengine::

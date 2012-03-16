@@ -123,8 +123,9 @@ bundle agent app_postgresql_conf(env)
 {
 
 classes:
- #Only sync configuration files if the data directory already exists from successful initdb
- "postgresql_data_exists" expression => fileexists("/var/lib/pgsql/9.1/data");
+ #Only sync configuration files if the data directory already exists and is populated
+ #from successful initdb
+ "postgresql_data_exists" expression => fileexists("/var/lib/pgsql/9.1/data/postgresql.conf");
 
 files:
   postgresql_data_exists::

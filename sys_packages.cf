@@ -61,17 +61,19 @@ vars:
     "cfengine-community"
  };
 
- "all_packages" slist => {
-	@(core_packages),
-	@(dev_packages),
- };
-
 classes:
  "sysgrp_cfengine" expression => classmatch("sysgrp_cfengine_.*");
 
 packages:
  sysgrp_cfengine::
-  "$(all_packages)"
+  "$(core_packages)"
+    comment => "Install localdev packages",
+    action => if_elapsed("$(globals.default_ifelapsed)"),
+    package_policy => "add",
+    package_method => yum_ifelapsed;
+
+ sysgrp_cfengine::
+  "$(dev_packages)"
     comment => "Install localdev packages",
     action => if_elapsed("$(globals.default_ifelapsed)"),
     package_policy => "add",
