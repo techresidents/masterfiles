@@ -17,7 +17,11 @@ vars:
 	"yum-utils"
  };
 
+ #rpm -Uvh http://dl.fedoraproject.org/pub/epel/5/i386/epel-release-5-4.noarch.rpm
  "epel_repo_rpm_path" string => "$(globals.rpm_repo)/epel-release-5-4.noarch.rpm";
+
+ #wget http://yum.postgresql.org/9.1/redhat/rhel-5-x86_64/pgdg-centos91-9.1-4.noarch.rpm
+ "postgresql_yum_repo_path" string => "$(globals.rpm_repo)/$(postgresql_yum_repo)";
 
 classes:
  "sysgrp_cfengine" expression => classmatch("sysgrp_cfengine_.*");
@@ -29,6 +33,12 @@ files:
       perms => mog("644", "root", "root"),
       action => if_elapsed("$(globals.default_ifelapsed)"),
       copy_from => remote_dcp("$(epel_repo_rpm_path)", "$(sys.policy_hub)");
+
+    "$(postgresql_yum_repo_path)"
+      comment => "Sync postgrsql yum repo",
+      perms => mog("644", "root", "root"),
+      action => if_elapsed("$(globals.default_ifelapsed)"),
+      copy_from => remote_dcp("$(postgresql_yum_repo_path)", "$(sys.policy_hub)");
 
 packages:
   sysgrp_cfengine::
@@ -48,6 +58,16 @@ packages:
       package_version => "5-4",
       package_architectures => { "noarch" },
       package_method => rpm_ifelapsed("$(globals.rpm_repo)");
+
+    "pgdg-centos91"
+      comment => "Install postgresql yum repo",
+      action => if_elapsed("$(globals.default_ifelapsed)"),
+      classes => if_repaired("postgresql_installed"),
+      package_policy => "add",
+      package_version => "9.1-4",
+      package_architectures => { "noarch" },
+      package_method => rpm_ifelapsed("$(globals.rpm_repo)");
+
 
 methods:
   sysgrp_cfengine::
