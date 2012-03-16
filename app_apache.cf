@@ -26,6 +26,7 @@ packages:
   sysgrp_cfengine.apache::
     "$(apache_packages)"
       comment => "Install apache packages",
+      classes => if_repaired("apache_installed"),        
       action => if_elapsed("$(globals.default_ifelapsed)"),
       package_policy => "add",
       package_method => yum_ifelapsed;
@@ -42,6 +43,10 @@ methods:
 
   sysgrp_cfengine.sysver_apache_prod::
     "any" usebundle => app_apache_conf("prod");
+
+commands:
+  sysgrp_cfengine.apache.apache_installed::
+    "/sbin/chkconfig httpd on";
 }
 
 
