@@ -46,8 +46,11 @@ methods:
 commands:
   sysgrp_cfengine.yum_installed::
     "/usr/bin/yum clean all";
-    "/usr/bin/yum -y check-update";
-    "/usr/bin/yum -y update";
+
+    # The following also results in OS minor version updates i.e. CentOS 5.7 => 5.8.
+    # Disabling until we determine if this can be worked around with repo configs.
+    #"/usr/bin/yum -y check-update";
+    #    "/usr/bin/yum -y update";
 }
 
 #This must be done after repos are installed, since we adjust the
