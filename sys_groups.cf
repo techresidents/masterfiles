@@ -21,9 +21,9 @@
 bundle common sysgrp
 {
 vars:
-  "group_output" string => execresult("$(globals.sysutil) groups -H localhost --format 'sysgrp_{group}_{env}'", "useshell");
-  "group_list" slist => splitstring("$(group_output)", "\n", "1000");
+  #"group_output" string => execresult("$(globals.sysutil) groups -H localhost --format 'sysgrp_{group}_{env}'", "useshell");
+  #"group_list" slist => splitstring("$(group_output)", "\n", "1000");
 
 classes:
-  "$(group_list)" expression => "any";
+  #"$(group_list)" expression => "any";
 }

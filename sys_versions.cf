@@ -29,13 +29,13 @@
 bundle common sysver
 {
 vars:
-  "package_class_output" string => execresult("$(globals.sysutil) packages -H localhost --format 'sysver_{package}_{env}'", "useshell");
-  "package_class_list" slist => splitstring("$(package_class_output)", "\n", "1000");
+  #"package_class_output" string => execresult("$(globals.sysutil) packages -H localhost --format 'sysver_{package}_{env}'", "useshell");
+  #"package_class_list" slist => splitstring("$(package_class_output)", "\n", "1000");
 
-  "package_version_output" string => execresult("$(globals.sysutil) packages -H localhost --format '{version} {release} {package}_{env}'", "useshell");
-  "package_version_list" slist => splitstring("$(package_version_output)", "\n", "1000");
+  #"package_version_output" string => execresult("$(globals.sysutil) packages -H localhost --format '{version} {release} {package}_{env}'", "useshell");
+  #"package_version_list" slist => splitstring("$(package_version_output)", "\n", "1000");
 
 classes:
-  "$(package_class_list)" expression => "any";
-  "unused" expression => regextract("(.*) (.*) (.*)", "$(package_version_list)", lastnode("$(package_version_list)", " "));
+  #"$(package_class_list)" expression => "any";
+  #"unused" expression => regextract("(.*) (.*) (.*)", "$(package_version_list)", lastnode("$(package_version_list)", " "));
 }

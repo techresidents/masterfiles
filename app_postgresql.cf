@@ -124,6 +124,8 @@ bundle agent app_postgresql_conf(env)
 {
 
 classes:
+ "sysgrp_cfengine" expression => classmatch("sysgrp_cfengine_.*");
+
  #Only sync configuration files if the data directory already exists and is populated
  #from successful initdb
  "postgresql_data_exists" expression => fileexists("/var/lib/pgsql/9.1/data/postgresql.conf");
