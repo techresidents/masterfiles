@@ -15,7 +15,7 @@ classes:
  "sysgrp_cfengine" expression => classmatch("sysgrp_cfengine_.*");
 
 files:
-  sysgrp_cfengine::
+    #Collect cfengine garbage for all hosts even if not currently managed by cfengine.
     "$(sys.workdir)/outputs"
       comment => "Removing old cfengine output files",
       delete => tidy,
