@@ -14,11 +14,11 @@
 bundle agent sys_users
 {
 vars:
-  "passwd[$(globals.default_user_name)]" string => "$(globals.default_user_name):x:$(globals.default_user_id):$(globals.default_group_id)::/home/$(globals.default_user_name):/bin/bash";
-  "passwd[jmullins]" string => "jmullins:x:501:$(globals.default_group_id)::/home/jmullins:/bin/bash";
-  "passwd[bmullins]" string => "bmullins:x:502:$(globals.default_group_id)::/home/bmullins:/bin/bash";
+  "passwd[thirty]" string => "thirty:x:500:500::/home/thirty:/bin/bash";
+  "passwd[jmullins]" string => "jmullins:x:501:500::/home/jmullins:/bin/bash";
+  "passwd[bmullins]" string => "bmullins:x:502:500::/home/bmullins:/bin/bash";
   
-  "group[$(globals.default_group_name)]" string => "$(globals.default_group_name):x:$(globals.default_group_id):";
+  "group[thirty]" string => "thirty:x:500:";
 
   "users" slist => getindices("passwd");
 

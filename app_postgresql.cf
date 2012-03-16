@@ -133,21 +133,20 @@ files:
 
     "/var/lib/pgsql/9.1/data/postgresql.conf"
       comment => "Install postgresql.conf",
-      classes => if_repaired("postgresql_conf_repaired"),
+      classes => if_repaired("postgres_conf_repaired"),
       perms => mog("600", "postgres", "postgres"),
       action => if_elapsed("$(globals.default_ifelapsed)"),
       copy_from => remote_dcp("$(globals.masterfiles)/env/$(env)/postgresql/data/postgresql.conf", "$(sys.policy_hub)");
 
     "/var/lib/pgsql/9.1/data/pg_hba.conf"
       comment => "Install postgresql.conf",
-      classes => if_repaired("postgresql_conf_repaired"),
+      classes => if_repaired("postgres_conf_repaired"),
       perms => mog("600", "postgres", "postgres"),
       action => if_elapsed("$(globals.default_ifelapsed)"),
       copy_from => remote_dcp("$(globals.masterfiles)/env/$(env)/postgresql/data/pg_hba.conf", "$(sys.policy_hub)");
 
-commands:
-  #only restart db on config change if localdev
-  #to risky to do this on other environments.
-  sysgrp_cfengine.postgresql_localdev.postgresql_conf_repaired::
-    "/sbin/service postgresql-9.1 restart";	
+#Commenting this out. Too dangerous to auto restart database on config changes.
+#commands:
+#  sysgrp_cfengine.postgresql.postgresql_conf_repaired::
+#    "/sbin/service postgresql-9.1 restart";	
 }
