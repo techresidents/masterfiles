@@ -8,14 +8,17 @@
 #           };
 #}
 
+
+#Note that there is a cfengine bug where usernames that start with numbers are misinterpreted as uids.
+#This also exists in bugs and impacts all the perm functions, userexists, and groupexists functions.
 bundle agent sys_users
 {
 vars:
-  "passwd[30and30]" string => "30and30:x:500:500::/home/30and30:/bin/bash";
-  "passwd[jmullins]" string => "jmullins:x:501:500::/home/jmullins:/bin/bash";
-  "passwd[bmullins]" string => "bmullins:x:502:500::/home/bmullins:/bin/bash";
+  "passwd[$(globals.default_user_name)]" string => "$(globals.default_user_name):x:$(globals.default_user_id):$(globals.default_group_id)::/home/$(globals.default_user_name):/bin/bash";
+  "passwd[jmullins]" string => "jmullins:x:501:$(globals.default_group_id)::/home/jmullins:/bin/bash";
+  "passwd[bmullins]" string => "bmullins:x:502:$(globals.default_group_id)::/home/bmullins:/bin/bash";
   
-  "group[30and30]" string => "30and30:x:500:";
+  "group[$(globals.default_group_name)]" string => "$(globals.default_group_name):x:$(globals.default_group_id):";
 
   "users" slist => getindices("passwd");
 
@@ -48,6 +51,11 @@ files:
       perms => mog("644", "$(users)", "$(globals.default_group)"),
       copy_from => seed_cp("/etc/skel/.bashrc"),
       edit_line => append_if_no_lines("$(globals.default_profile_lines)");
+
+    "/home/$(users)/.m2/."
+      comment => "Create maven2 directory",
+      perms => mog("755", "$(users)", "$(globals.default_group)"),
+      create => "true";
 
     "/home/$(users)/.m2/settings.xml"
       comment => "Sync maven2 settings.xml",

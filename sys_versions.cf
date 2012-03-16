@@ -16,6 +16,16 @@
 #
 #}
 
+#This common bundle will execute the sysutil to determine which packages are needed by this host
+#and do the following:
+# 1) Set classes of the form sysver_<package>_<env>  i.e. sysver_apache_localdev
+# 2) Create an array named sysver.<package>_<env> where index 1 is version and 2 is release
+#
+# Note an alternative approach may have been to not use an agent bundle and execute the 
+# sysutil script with the module => yes and format the output to have cfengine
+# create the classes. The only caveat is that it looks like arrays can be created this way,
+# so we would need to create scalars variables for the version and release.
+
 bundle common sysver
 {
 vars:

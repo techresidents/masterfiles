@@ -11,11 +11,13 @@
 #{
 #
 #reports:
-#  sysgroup_web_localdev::
-#    "Member of sysgroup_web_localdev";
+#  sysgrp_web_localdev::
+#    "Member of sysgrp_web_localdev";
 #
 #}
 
+#Execute the sysutil utility to determine which groups the host belongs and the following:
+# 1) Create classes of the form sysgrp_<group>   i.e. sysgrp_web or sysgrp_database
 bundle common sysgrp
 {
 vars:

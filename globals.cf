@@ -3,9 +3,15 @@ bundle common globals
 vars:
 
  "default_user" string => "500";
+ "default_user_id" string => "500";
+ "default_user_name" string => "thirty";
+
  "default_group" string => "500";
+ "default_group_id" string => "500";
+ "default_group_name" string => "thirty";
+
  "default_ifelapsed" int => "240";
- "default_package_ifelapsed" int => "1";
+ "default_package_ifelapsed" int => "240";
 
  "default_profile" string => "/opt/3ps/etc/profile";
  "default_profile_lines" string => 
