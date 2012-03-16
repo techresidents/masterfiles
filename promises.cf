@@ -6,12 +6,33 @@
 
 body common control
 {
- bundlesequence => { "main", "techresidents_packages", "techresidents_apache" };
+ bundlesequence => {
+                    "main",
+                    "sys_garbage",
+                    "sys_users",
+                    "sys_files",
+                    "sys_repos",
+                    "sys_packages",
+                    "sys_extras",
+                    "app_postgresql",
+                    "app_apache",
+                    "app_techresidents_web"
+                   };
 
  inputs => { 
             "cfengine_stdlib.cf", 
-            "techresidents_packages.cf",     
-            "techresidents_apache.cf",
+            "globals.cf",
+            "sys_garbage.cf",
+            "sys_users.cf",
+            "sys_files.cf",
+            "sys_versions.cf",
+            "sys_groups.cf",
+            "sys_repos.cf",
+            "sys_packages.cf",
+            "sys_extras.cf",
+            "app_postgresql.cf",
+            "app_apache.cf",     
+            "app_techresidents_web.cf",
            };
 
  version => "Community Promises.cf 1.0.0";
@@ -49,7 +70,7 @@ bundle common def
 
     "acl" slist => { 
                    "$(sys.policy_hub)",
-		   "108.59.254.187",
+		           "108.59.254.187",
                    "5.0.0.0/8"
                  #"$(sys.policy_hub)/16"  # Assume /16 LAN clients to start with
                  #  "2001:700:700:3.*", 
