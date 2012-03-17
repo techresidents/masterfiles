@@ -14,10 +14,16 @@ bundle agent sys_files
 classes:
  "sysgrp_cfengine" expression => classmatch("sysgrp_cfengine_.*");
 
+ #if host is in this group they are opting out of /opt sync
+ "sysgrp_opt_out" expression => classmatch("sysgrp_opt_out_.*");
+
 files:
 
 #Following will be installed on all systems and do not contain a check for the sysgrp_cfengine class.
 #This should only include the files necessary to determine if a host is under cfengine management.
+#With the exception of hosts that are in the sysgrp_opt_out. This should only be localdev boxes
+#which are testing non-standard versions.
+  !sysgrp_opt_out::
     "/opt/3ps/etc"
       comment => "Sync /opt/3ps/etc directory",
       perms => mog("644", "root", "root"),
