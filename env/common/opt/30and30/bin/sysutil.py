@@ -195,7 +195,7 @@ def groupsCommandHandler(sysconfig, args):
             group_filter = list_filter(args.groups))
 
     for group in groups:
-        log.info(args.format.format(**group))
+        log.info(args.format.format(**group).replace("\\n", "\n"))
 
 
 groupsCommandHandler.examples = """Examples:
@@ -214,7 +214,7 @@ def packagesCommandHandler(sysconfig, args):
             package_filter = list_filter(args.packages))
 
     for package in packages:
-        log.info(args.format.format(**package))
+        log.info(args.format.format(**package).replace("\\n", "\n"))
 
 
 packagesCommandHandler.examples = """Examples:
