@@ -193,7 +193,8 @@ bundle server access_rules()
 body executor control
 {
  any::
-
+  
+  #TODO properly configure cfengine email.
   splaytime  => "1";
   mailto     => "cfengine@$(def.domain)";
   mailfrom   => "cfengine@$(sys.host).$(def.domain)";

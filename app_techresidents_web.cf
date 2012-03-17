@@ -90,7 +90,6 @@ files:
     "$(web_root)/localdev.com/localdev/."
       comment => "Create localdev.com localdev env directory",
       perms => mog("644", "root", "root"),
-      action => if_elapsed("$(globals.default_ifelapsed)"),
       create => "true";
 
     "$(web_root)/localdev.com/localdev/test"
