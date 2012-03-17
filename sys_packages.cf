@@ -122,8 +122,8 @@ bundle agent sys_packages_rpm_multiversion(app, app_version, app_release, app_ar
 packages:
   "$(app)"
     comment => "Install multiversion package",
-    action => if_elapsed("$(globals.default_ifelapsed)"),
-    classes => if_ok("package_failure"),
+    action => if_elapsed("1"),
+    classes => if_ok("package_ok"),
     package_policy => "addupdate",
     package_version => "$(app_version)-$(app_release)",
     package_architectures => { "$(app_arch)" },
@@ -134,8 +134,9 @@ commands:
  #above packages promise will only fail if attempting to install an old version.
  #note that negation of if_ok is necessary, since no classes are defined at all in the case
  #where we're rolling back to an older version that is not currently installed.
- !package_failure::
-   "/bin/rpm -i --oldpackage $(globals.rpm_repo)/$(app)-$(app_version)-$(app_release).$(app_arch).rpm";
+ !package_ok::
+   "/bin/rpm -i --oldpackage $(globals.rpm_repo)/$(app)-$(app_version)-$(app_release).$(app_arch).rpm"
+     action => if_elapsed("1");
 }
 
 
