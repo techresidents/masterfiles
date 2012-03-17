@@ -19,7 +19,6 @@ classes:
 methods:
   sysgrp_cfengine.postgresql::
     "any" usebundle => app_postgresql_packages;
-    "any" usebundle => app_postgresql_init;
 
   sysgrp_cfengine.sysver_postgresql_localdev::
     "any" usebundle => app_postgresql_conf("localdev");
@@ -94,17 +93,9 @@ packages:
       classes => if_repaired("postgresql_installed"),
       package_policy => "add",
       package_method => yum_ifelapsed;
-}
-
-bundle agent app_postgresql_init
-{
-
-classes:
- #Only init if data directory exists and is not populated
- "postgresql_data_exists" expression => fileexists("/var/lib/pgsql/9.1/data/postgresql.conf");
 
 commands:
-  !postgresql_data_exists::
+  postgresql_installed::
 
     "/sbin/service postgresql-9.1 initdb";	
     
@@ -113,12 +104,15 @@ commands:
     #Wait for postgres to startup
     "/bin/sleep 30";
 
-    "/usr/bin/sudo -u postgres /usr/pgsql-9.1/bin/psql -c \"CREATE ROLE postgres\"";
+    "/usr/pgsql-9.1/bin/psql -c \"CREATE ROLE postgres\""
+      contain => postgresql_contain;
 
-    "/usr/bin/sudo -u postgres /usr/pgsql-9.1/bin/psql -c \"ALTER ROLE postgres with SUPERUSER INHERIT CREATEROLE CREATEDB LOGIN PASSWORD 'md5d567c3bd5b5af9c0b4f16da9320a0dac'\"";
+    "/usr/pgsql-9.1/bin/psql -c \"ALTER ROLE postgres with SUPERUSER INHERIT CREATEROLE CREATEDB LOGIN PASSWORD 'md5d567c3bd5b5af9c0b4f16da9320a0dac'\""
+      contain => postgresql_contain;
 
     "/sbin/chkconfig postgresql-9.1 on";
 }
+
 
 bundle agent app_postgresql_conf(env)
 {
@@ -152,4 +146,11 @@ commands:
   #it's too risky in other environments.
   sysgrp_cfengine.sysver_postgresql_localdev.postgresql_conf_repaired::
     "/sbin/service postgresql-9.1 restart";	
+}
+
+#execute commands as postgres user
+body contain postgresql_contain
+{
+useshell => "no";
+exec_owner => "postgres";
 }
