@@ -88,7 +88,7 @@ packages:
       package_method => rpm_ifelapsed("$(globals.rpm_repo)");
 
     "$(postgresql_packages)"
-      comment => "Install apache packages",
+      comment => "Install postgres packages",
       action => if_elapsed("$(globals.default_ifelapsed)"),
       classes => if_repaired("postgresql_installed"),
       package_policy => "add",

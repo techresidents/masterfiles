@@ -19,21 +19,21 @@ files:
 #Following will be installed on all systems and do not contain a check for the sysgrp_cfengine class.
 #This should only include the files necessary to determine if a host is under cfengine management.
     "/opt/3ps/etc"
-      comment => "Sync default profile",
+      comment => "Sync /opt/3ps/etc directory",
       perms => mog("644", "root", "root"),
       action => if_elapsed("$(globals.default_ifelapsed)"),
       copy_from => remote_dcp("$(globals.masterfiles)/env/common/opt/3ps/etc", "$(sys.policy_hub)"),
       depth_search => recurse("inf");
 
     "/opt/30and30/etc"
-      comment => "Sync default profile",
+      comment => "Sync /opt/30and30/etc directory",
       perms => mog("644", "root", "root"),
       action => if_elapsed("$(globals.default_ifelapsed)"),
       copy_from => remote_dcp("$(globals.masterfiles)/env/common/opt/30and30/etc", "$(sys.policy_hub)"),
       depth_search => recurse("inf");
 
     "/opt/30and30/bin"
-      comment => "Sync default profile",
+      comment => "Sync /opt/30and30/bin directory",
       perms => mog("755", "root", "root"),
       action => if_elapsed("$(globals.default_ifelapsed)"),
       copy_from => remote_dcp("$(globals.masterfiles)/env/common/opt/30and30/bin", "$(sys.policy_hub)"),
