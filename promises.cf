@@ -8,6 +8,8 @@ body common control
 {
  bundlesequence => {
                     "main",
+                    "sysver",
+                    "sysgrp",
                     "sys_garbage",
                     "sys_users",
                     "sys_files",
@@ -22,11 +24,11 @@ body common control
  inputs => { 
             "cfengine_stdlib.cf", 
             "globals.cf",
+            "sys_versions.cf",
+            "sys_groups.cf",
             "sys_garbage.cf",
             "sys_users.cf",
             "sys_files.cf",
-            "sys_versions.cf",
-            "sys_groups.cf",
             "sys_repos.cf",
             "sys_packages.cf",
             "sys_extras.cf",

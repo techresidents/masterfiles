@@ -1,41 +1,25 @@
 #Uncomment for testing: /var/cfengine/bin/cf-agent -K -I -f <full_path>
 #body common control {
-# bundlesequence => { "sys_versions_test" };
+# bundlesequence => { "sysver" };
 #
 # inputs => { 
 #            "cfengine_stdlib.cf", 
 #            "globals.cf"
 #           };
 #}
-#bundle agent sys_versions_test
-#{
-#
-#reports:
-#  sysver_techresidents_web_localdev::
-#    "$(sysver.techresidents_web_localdev[1])-$(sysver.techresidents_web_localdev[2])";
-#
-#}
 
 #This common bundle will execute the sysutil to determine which packages are needed by this host
 #and do the following:
 # 1) Set classes of the form sysver_<package>_<env>  i.e. sysver_apache_localdev
-# 2) Create an array named sysver.<package>_<env> where index 1 is version and 2 is release
+# 2) Create variables named python.<package>_<env>_version and python.<package>_<env>_release
 #
-# Note an alternative approach may have been to not use an agent bundle and execute the 
-# sysutil script with the module => yes and format the output to have cfengine
-# create the classes. The only caveat is that it looks like arrays can be created this way,
-# so we would need to create scalars variables for the version and release.
 
-bundle common sysver
+bundle agent sysver
 {
-vars:
-  #"package_class_output" string => execresult("$(globals.sysutil) packages -H localhost --format 'sysver_{package}_{env}'", "useshell");
-  #"package_class_list" slist => splitstring("$(package_class_output)", "\n", "1000");
-
-  #"package_version_output" string => execresult("$(globals.sysutil) packages -H localhost --format '{version} {release} {package}_{env}'", "useshell");
-  #"package_version_list" slist => splitstring("$(package_version_output)", "\n", "1000");
-
-classes:
-  #"$(package_class_list)" expression => "any";
-  #"unused" expression => regextract("(.*) (.*) (.*)", "$(package_version_list)", lastnode("$(package_version_list)", " "));
+commands:
+  "$(globals.sysutil) packages -H localhost --format '+sysver_{package}_{env}\n={package}_{env}_version={version}\n={package}_{env}_release={release}'",
+    module => "true";
+reports:
+ localdev::
+  "$(sysver.apache_localdev_version)";
 }

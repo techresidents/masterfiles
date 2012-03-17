@@ -25,24 +25,24 @@ classes:
 
 methods:
   sysgrp_cfengine.sysver_techresidents_web_localdev::
-    "any" usebundle => sys_repo_sync("$(web_app)", "$(sysver.techresidents_web_localdev[1])", "$(sysver.techresidents_web_localdev[2])", "$(web_app_arch)");
-    "any" usebundle => sys_packages_rpm_multiversion("$(web_app)", "$(sysver.techresidents_web_localdev[1])", "$(sysver.techresidents_web_localdev[2])", "$(web_app_arch)");
-    "any" usebundle => app_techresidents_web_conf("localdev", "$(web_root)", "$(web_site)", "$(web_app)", "$(sysver.techresidents_web_localdev[1])");
+    "any" usebundle => sys_repo_sync("$(web_app)", "$(python.techresidents_web_localdev_version)", "$(python.techresidents_web_localdev_release)", "$(web_app_arch)");
+    "any" usebundle => sys_packages_rpm_multiversion("$(web_app)", "$(python.techresidents_web_localdev_version)", "$(python.techresidents_web_localdev_release)", "$(web_app_arch)");
+    "any" usebundle => app_techresidents_web_conf("localdev", "$(web_root)", "$(web_site)", "$(web_app)", "$(python.techresidents_web_version)");
 
   sysgrp_cfengine.sysver_techresidents_web_integration::
-    "any" usebundle => sys_repo_sync("$(web_app)", "$(sysver.techresidents_web_integration[1])", "$(sysver.techresidents_web_integration[2])", "$(web_app_arch)");
-    "any" usebundle => sys_packages_rpm_multiversion("$(web_app)", "$(sysver.techresidents_web_integration[1])", "$(sysver.techresidents_web_integration[2])", "$(web_app_arch)");
-    "any" usebundle => app_techresidents_web_conf("integration", "$(web_root)", "$(web_site)", "$(web_app)","$(sysver.techresidents_web_integration[1])");
+    "any" usebundle => sys_repo_sync("$(web_app)", "$(python.techresidents_web_integration_version)", "$(python.techresidents_web_integration_release)", "$(web_app_arch)");
+    "any" usebundle => sys_packages_rpm_multiversion("$(web_app)", "$(python.techresidents_web_integration_version)", "$(python.techresidents_web_integration_release)", "$(web_app_arch)");
+    "any" usebundle => app_techresidents_web_conf("integration", "$(web_root)", "$(web_site)", "$(web_app)","$(python.techresidents_web_integration_version)");
 
   sysgrp_cfengine.sysver_techresidents_web_staging::
-    "any" usebundle => sys_repo_sync("$(web_app)", "$(sysver.techresidents_web_staging[1])", "$(sysver.techresidents_web_staging[2])", "$(web_app_arch)");
-    "any" usebundle => sys_packages_rpm_multiversion("$(web_app)", "$(sysver.techresidents_web_staging[1])", "$(sysver.techresidents_web_staging[2])", "$(web_app_arch)");
-    "any" usebundle => app_techresidents_web_conf("staging", "$(web_root)", "$(web_site)", "$(web_app)", "$(sysver.techresidents_web_staging[1])");
+    "any" usebundle => sys_repo_sync("$(web_app)", "$(python.techresidents_web_staging_version)", "$(python.techresidents_web_staging_release)", "$(web_app_arch)");
+    "any" usebundle => sys_packages_rpm_multiversion("$(web_app)", "$(python.techresidents_web_staging_version)", "$(python.techresidents_web_staging_release)", "$(web_app_arch)");
+    "any" usebundle => app_techresidents_web_conf("staging", "$(web_root)", "$(web_site)", "$(web_app)", "$(python.techresidents_web_staging_version)");
 
   sysgrp_cfengine.sysver_techresidents_web_prod::
-    "any" usebundle => sys_repo_sync("$(web_app)", "$(sysver.techresidents_web_prod[1])", "$(sysver.techresidents_web_prod[2])", "$(web_app_arch)");
-    "any" usebundle => sys_packages_rpm_multiversion("$(web_app)", "$(sysver.techresidents_web_prod[1])", "$(sysver.techresidents_web_prod[2])", "$(web_app_arch)");
-    "any" usebundle => app_techresidents_web_conf("prod", "$(web_root)", "$(web_site)", "$(web_app)", "$(sysver.techresidents_web_prod[1])");
+    "any" usebundle => sys_repo_sync("$(web_app)", "$(python.techresidents_web_prod_version)", "$(python.techresidents_web_prod_release)", "$(web_app_arch)");
+    "any" usebundle => sys_packages_rpm_multiversion("$(web_app)", "$(python.techresidents_web_prod_version)", "$(python.techresidents_web_prod_release)", "$(web_app_arch)");
+    "any" usebundle => app_techresidents_web_conf("prod", "$(web_root)", "$(web_site)", "$(web_app)", "$(python.techresidents_web_prod_version)");
 
 processes:
   sysgrp_cfengine.techresidents_web::

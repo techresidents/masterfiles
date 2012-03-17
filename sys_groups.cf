@@ -1,29 +1,20 @@
 #Uncomment for testing: /var/cfengine/bin/cf-agent -K -I -f <full_path>
 #body common control {
-# bundlesequence => { "sys_groups_test" };
+# bundlesequence => { "sysgrp" };
 #
 # inputs => { 
 #            "cfengine_stdlib.cf", 
 #            "globals.cf"
 #           };
 #}
-#bundle agent sys_groups_test
-#{
-#
-#reports:
-#  sysgrp_web_localdev::
-#    "Member of sysgrp_web_localdev";
-#
-#}
 
 #Execute the sysutil utility to determine which groups the host belongs and the following:
 # 1) Create classes of the form sysgrp_<group>   i.e. sysgrp_web or sysgrp_database
-bundle common sysgrp
+bundle agent sysgrp
 {
 vars:
-  #"group_output" string => execresult("$(globals.sysutil) groups -H localhost --format 'sysgrp_{group}_{env}'", "useshell");
-  #"group_list" slist => splitstring("$(group_output)", "\n", "1000");
 
-classes:
-  #"$(group_list)" expression => "any";
+commands:
+  "$(globals.sysutil) groups -H localhost --format '+sysgrp_{group}_{env}'"
+    module => "true";
 }
