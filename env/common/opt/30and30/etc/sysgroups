@@ -7,6 +7,10 @@
         "packages" : []
     },
 
+    "opt_out" : {
+        "packages" : []
+    },
+
     "web" : {
         "packages" : ["apache", "techresidents_web"]
     },
