@@ -41,7 +41,12 @@ processes:
 
 commands:
   sysgrp_cfengine.postgresql.postgresql_restart::
-    "/sbin/service postgresql-9.1 restart";	
+    #The cmd_repair classes are necessary to ensure that the command will be executed.
+    #If unique classes are not given and the same command has already been executed in
+    #a previous promise, cfengine will optimize away the execution. This makes no sense,
+    #but this is a work around until we get an explanation from CF.
+    "/sbin/service postgresql-9.1 restart"
+      classes => cmd_repair("app_postgresql_restart", "app_postgresql_restart");
 }
 
 bundle agent app_postgresql_packages
@@ -99,10 +104,16 @@ commands:
 
     "/sbin/service postgresql-9.1 initdb";	
     
-    "/sbin/service postgresql-9.1 restart";	
+    #The cmd_repair classes are necessary to ensure that the command will be executed.
+    #If unique classes are not given and the same command has already been executed in
+    #a previous promise, cfengine will optimize away the execution. This makes no sense,
+    #but this is a work around until we get an explanation from CF.
+    "/sbin/service postgresql-9.1 restart"
+      classes => cmd_repair("app_postgresql_packages_restart", "app_postgresql_packages_restart");
 
     #Wait for postgres to startup
-    "/bin/sleep 30";
+    "/bin/sleep 30"
+      classes => cmd_repair("app_postgresql_packages_sleep", "app_postgresql_packages_sleep");
 
     "/usr/pgsql-9.1/bin/psql -c \"CREATE ROLE postgres\""
       contain => postgresql_contain;
@@ -145,7 +156,12 @@ commands:
   #only auto-restart postgres for localdev environment
   #it's too risky in other environments.
   sysgrp_cfengine.sysver_postgresql_localdev.postgresql_conf_repaired::
-    "/sbin/service postgresql-9.1 restart";	
+    #The cmd_repair classes are necessary to ensure that the command will be executed.
+    #If unique classes are not given and the same command has already been executed in
+    #a previous promise, cfengine will optimize away the execution. This makes no sense,
+    #but this is a work around until we get an explanation from CF.
+    "/sbin/service postgresql-9.1 restart"
+      classes => cmd_repair("app_postgresql_conf_restart", "app_postgresql_conf_restart");
 }
 
 #execute commands as postgres user

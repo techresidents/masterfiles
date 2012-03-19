@@ -78,7 +78,7 @@ files:
       move_obstructions => "true",
       link_from => ln_web("$(web_root)/$(web_site)/install/$(web_app)-$(web_app_version)/$(web_app)");
 
-    "/etc/httpd/conf.d/$(web_site).conf"
+    "/etc/httpd/conf.d/$(web_site).$(env).conf"
       comment => "Install apache configuration httpd.conf",
       classes => if_repaired("apache_conf_repaired"),
       action => if_elapsed("$(globals.default_ifelapsed)"),
@@ -107,7 +107,13 @@ commands:
   #only auto-restart apache for localdev environment
   #it's too risky in other environments.
   sysgrp_cfengine.localdev.is_localdev.apache_conf_repaired::
-    "/sbin/service httpd restart";	
+    
+    #The cmd_repair classes are necessary to ensure that the command will be executed.
+    #If unique classes are not given and the same command has already been executed in
+    #a previous promise, cfengine will optimize away the execution. This makes no sense,
+    #but this is a work around until we get an explanation from CF.
+    "/sbin/service httpd restart"
+      classes => cmd_repair("app_techresidents_web_conf_restart", "app_techresidents_web_conf_restart");
 }
 
 body link_from ln_web(source)

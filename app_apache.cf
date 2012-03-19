@@ -56,7 +56,12 @@ commands:
     "/sbin/chkconfig httpd on";
 
   sysgrp_cfengine.restart_httpd::
-    "/sbin/service httpd restart";	
+    #The cmd_repair classes are necessary to ensure that the command will be executed.
+    #If unique classes are not given and the same command has already been executed in
+    #a previous promise, cfengine will optimize away the execution. This makes no sense,
+    #but this is a work around until we get an explanation from CF.
+    "/sbin/service httpd restart"
+      classes => cmd_repair("app_apache_restart", "app_apache_restart");
 }
 
 
@@ -81,5 +86,11 @@ commands:
   #only auto-restart apache for localdev environment
   #it's too risky in other environments.
   sysgrp_cfengine.sysver_apache_localdev.apache_conf_repaired::
-    "/sbin/service httpd restart";	
+
+    #The cmd_repair classes are necessary to ensure that the command will be executed.
+    #If unique classes are not given and the same command has already been executed in
+    #a previous promise, cfengine will optimize away the execution. This makes no sense,
+    #but this is a work around until we get an explanation from CF.
+    "/sbin/service httpd restart"
+      classes => cmd_repair("app_apache_conf_restart", "app_apache_conf_restart");
 }
