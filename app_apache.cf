@@ -44,14 +44,27 @@ methods:
   sysgrp_cfengine.sysver_apache_prod::
     "any" usebundle => app_apache_conf("prod");
 
+processes:
+  sysgrp_cfengine.apache::
+    "httpd"
+      comment => "Ensure httpd is running",
+      action => if_elapsed(1),
+      restart_class => "restart_httpd";
+
 commands:
   sysgrp_cfengine.apache.apache_installed::
     "/sbin/chkconfig httpd on";
+
+  sysgrp_cfengine.restart_httpd::
+    "/sbin/service httpd restart";	
 }
 
 
 bundle agent app_apache_conf(env)
 {
+classes:
+ "sysgrp_cfengine" expression => classmatch("sysgrp_cfengine_.*");
+
 files:
     "/etc/httpd/conf.d/ssl.conf"
       comment => "Disable ssl.conf by renaming it to ssl.conf.unused",
@@ -60,6 +73,13 @@ files:
 
     "/etc/httpd/conf/httpd.conf"
       comment => "Install apache configuration httpd.conf",
+      classes => if_repaired("apache_conf_repaired"),
       action => if_elapsed("$(globals.default_ifelapsed)"),
       copy_from => remote_dcp("$(globals.masterfiles)/env/$(env)/apache/conf/httpd.conf", "$(sys.policy_hub)");
+
+commands:
+  #only auto-restart apache for localdev environment
+  #it's too risky in other environments.
+  sysgrp_cfengine.sysver_apache_localdev.apache_conf_repaired::
+    "/sbin/service httpd restart";	
 }

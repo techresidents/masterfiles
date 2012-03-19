@@ -59,6 +59,7 @@ commands:
 bundle agent app_techresidents_web_conf(env, web_root, web_site, web_app, web_app_version)
 {
 classes:
+  "sysgrp_cfengine" expression => classmatch("sysgrp_cfengine_.*");
   "is_localdev" expression => regcmp("localdev", "$(env)");
 
 files:
@@ -76,6 +77,12 @@ files:
       comment => "Create web app symlink",
       move_obstructions => "true",
       link_from => ln_web("$(web_root)/$(web_site)/install/$(web_app)-$(web_app_version)/$(web_app)");
+
+    "/etc/httpd/conf.d/$(web_site).conf"
+      comment => "Install apache configuration httpd.conf",
+      classes => if_repaired("apache_conf_repaired"),
+      action => if_elapsed("$(globals.default_ifelapsed)"),
+      copy_from => remote_dcp("$(globals.masterfiles)/env/$(env)/apache/conf.d/$(web_site).conf", "$(sys.policy_hub)");
  
  
   #if localdev host and environment is set to localdev additionally configure the following
@@ -95,6 +102,12 @@ files:
     "$(web_root)/localdev.com/localdev/test"
       move_obstructions => "true",
       link_from => ln_web("$(web_root)/$(web_site)/install/$(web_app)-$(web_app_version)/$(web_app)");
+
+commands:
+  #only auto-restart apache for localdev environment
+  #it's too risky in other environments.
+  sysgrp_cfengine.localdev.is_localdev.apache_conf_repaired::
+    "/sbin/service httpd restart";	
 }
 
 body link_from ln_web(source)
