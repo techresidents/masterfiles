@@ -12,11 +12,15 @@
     },
 
     "web" : {
-        "packages" : ["apache", "techresidents_web"]
+        "packages" : ["apache", "techresidents_web", "mongrel2", "chatsvc"]
     },
 
     "database" : {
         "packages" : ["postgresql"]
+    },
+
+    "zookeeper" : {
+        "packages" : ["zookeeper"]
     },
 
     "services" : {
