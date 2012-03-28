@@ -52,7 +52,7 @@ methods:
     "any" usebundle => app_zookeeper_conf("prod");
 
 commands:
-  sysgrp_cfengine.restart_zookeeper::
+  sysgrp_cfengine.zookeeper.restart_zookeeper::
     #The cmd_repair classes are necessary to ensure that the command will be executed.
     #If unique classes are not given and the same command has already been executed in
     #a previous promise, cfengine will optimize away the execution. This makes no sense,
