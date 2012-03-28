@@ -3,7 +3,7 @@ static_dir = Dir(base='static/',
                  default_ctype='text/plain')
 
 handler_chat = Handler(send_spec='tcp://*:9997',
-                       send_ident='34f9ceee-cd52-4b7f-b197-88bf2f0ec378',
+                       send_ident='$(app_mongrel2.mongrel2_chat_send_ident)',
                        recv_spec='tcp://*:9996', recv_ident='')
 
 # your main host
@@ -14,7 +14,7 @@ localhost = Host(name="localhost", routes={
 
 # the server to run them all
 main = Server(
-    uuid="2f62bd5-9e59-49cd-993c-3b6013c28f05",
+    uuid="$(app_mongrel2.mongrel2_uuid)",
     access_log="/logs/access.log",
     error_log="/logs/error.log",
     chroot="/opt/3ps/app/mongrel2",
