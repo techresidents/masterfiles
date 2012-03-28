@@ -1,0 +1,82 @@
+#Uncomment for testing: /var/cfengine/bin/cf-agent -K -I -f <full_path>
+#body common control {
+# bundlesequence => { "app_service" };
+#
+# inputs => { 
+#            "cfengine_stdlib.cf", 
+#            "globals.cf",
+#            "sys_versions.cf",
+#            "sys_repos.cf"
+#           };
+#}
+
+bundle agent app_service_conf(env, service_root, service_data_root, service, service_version)
+{
+classes:
+  "sysgrp_cfengine" expression => classmatch("sysgrp_cfengine_.*");
+
+files:
+    "$(service_root)/."
+      comment => "Create service root directory",
+      perms => mog("755", "root", "root"),
+      create => "true";
+
+    "$(service_data_root)/."
+      comment => "Create service data root directory",
+      perms => mog("755", "root", "root"),
+      create => "true";
+
+    "$(service_data_root)/$(service)/logs/."
+      comment => "Create service logs directory",
+      perms => mog("755", "$(globals.default_user)", "$(globals.default_group)"),
+      create => "true";
+
+    "$(service_data_root)/$(service)/pid/."
+      comment => "Create service pid directory",
+      perms => mog("755", "$(globals.default_user)", "$(globals.default_group)"),
+      create => "true";
+
+    "$(service_root)/$(service)/$(env)/."
+      comment => "Create service env directory",
+      perms => mog("755", "$(globals.default_user)", "$(globals.default_group)"),
+      create => "true";
+
+    "$(service_root)/$(service)/$(env)/$(service)"
+      comment => "Create web app symlink",
+      classes => if_repaired("service_conf_repaired"),
+      move_obstructions => "true",
+      link_from => ln_service("$(service_root)/$(service)/install/$(service)-$(service_version)/$(service)");
+
+commands:
+  sysgrp_cfengine.service_conf_repaired::
+    
+    #The cmd_repair classes are necessary to ensure that the command will be executed.
+    #If unique classes are not given and the same command has already been executed in
+    #a previous promise, cfengine will optimize away the execution. This makes no sense,
+    #but this is a work around until we get an explanation from CF.
+    "$(service_root)/$(service)/$(env)/$(service)/bin/restart $(env)"
+      classes => cmd_repair("app_$(service)_$(env)_conf_restart", "app_$(service)_$(env)_conf_restart");
+}
+
+bundle agent app_service_run(env, service_root, service_data_root, service, service_version)
+{
+classes:
+  "sysgrp_cfengine" expression => classmatch("sysgrp_cfengine_.*");
+  "restart_service" not => fileexists("$(service_data_root)/$(service)/pid/$(service).$(env).pid");
+
+commands:
+  sysgrp_cfengine.restart_service::
+    
+    #The cmd_repair classes are necessary to ensure that the command will be executed.
+    #If unique classes are not given and the same command has already been executed in
+    #a previous promise, cfengine will optimize away the execution. This makes no sense,
+    #but this is a work around until we get an explanation from CF.
+    "$(service_root)/$(service)/$(env)/$(service)/bin/restart $(env)"
+      classes => cmd_repair("app_$(service)_$(env)_run_restart", "app_$(service)_$(env)_run_restart");
+}
+
+body link_from ln_service(source)
+{
+  link_type => "symlink";
+  source => "$(source)";
+}

@@ -1,0 +1,164 @@
+#Uncomment for testing: /var/cfengine/bin/cf-agent -K -I -f <full_path>
+#body common control {
+# bundlesequence => { "app_mongrel2" };
+#
+# inputs => { 
+#            "cfengine_stdlib.cf", 
+#            "globals.cf",
+#            "sys_versions.cf"
+#           };
+#}
+
+bundle agent app_mongrel2
+{
+
+vars:
+
+"mongrel2_uuid" string => hash("$(sys.host)m2_uuid", "sha1");
+"mongrel2_chat_send_ident" string => hash("$(sys.host)m2_chat_send_ident", "sha1");
+
+ "mongrel2_packages" slist => {
+	"mongrel2"
+ };
+
+classes:
+ "sysgrp_cfengine" expression => classmatch("sysgrp_cfengine_.*");
+ "mongrel2" expression => classmatch("sysver_mongrel2_.*");
+
+packages:
+  sysgrp_cfengine.mongrel2::
+    "$(mongrel2_packages)"
+      comment => "Install mongrel2 packages",
+      classes => if_repaired("mongrel2_installed"),        
+      action => if_elapsed("$(globals.default_ifelapsed)"),
+      package_policy => "add",
+      package_method => yum_ifelapsed;
+
+methods:
+  sysgrp_cfengine.sysver_mongrel2_localdev::
+    "any" usebundle => app_mongrel2_conf("localdev");
+
+  sysgrp_cfengine.sysver_mongrel2_integration::
+    "any" usebundle => app_mongrel2_conf("integration");
+
+  sysgrp_cfengine.sysver_mongrel2_staging::
+    "any" usebundle => app_mongrel2_conf("staging");
+
+  sysgrp_cfengine.sysver_mongrel2_prod::
+    "any" usebundle => app_mongrel2_conf("prod");
+
+processes:
+  sysgrp_cfengine.mongrel2::
+    "mongrel2"
+      comment => "Ensure mongrel2 is running",
+      action => if_elapsed(1),
+      restart_class => "restart_mongrel2";
+
+commands:
+  sysgrp_cfengine.restart_mongrel2::
+    #The cmd_repair classes are necessary to ensure that the command will be executed.
+    #If unique classes are not given and the same command has already been executed in
+    #a previous promise, cfengine will optimize away the execution. This makes no sense,
+    #but this is a work around until we get an explanation from CF.
+    "/opt/3ps/app/mongrel2/bin/restart"
+      contain => mongrel2_start_contain,
+      classes => cmd_repair("app_mongrel2_restart", "app_mongrel2_restart");
+}
+
+
+bundle agent app_mongrel2_conf(env)
+{
+classes:
+ "sysgrp_cfengine" expression => classmatch("sysgrp_cfengine_.*");
+
+files:
+    "/opt/3ps/app/mongrel2/."
+      comment => "Create mongrel2 app directory",
+      action => if_elapsed("$(globals.default_ifelapsed)"),
+      perms => mog("755", "$(globals.default_user)", "$(globals.default_group)"),
+      create => "true";
+
+    "/opt/3ps/app/mongrel2/run/."
+      comment => "Create mongrel2 run directory",
+      action => if_elapsed("$(globals.default_ifelapsed)"),
+      perms => mog("755", "$(globals.default_user)", "$(globals.default_group)"),
+      create => "true";
+
+    "/opt/3ps/app/mongrel2/logs/."
+      comment => "Create mongrel2 logs directory",
+      action => if_elapsed("$(globals.default_ifelapsed)"),
+      perms => mog("755", "$(globals.default_user)", "$(globals.default_group)"),
+      create => "true";
+
+    "/opt/3ps/app/mongrel2/tmp/."
+      comment => "Create mongrel2 tmp directory",
+      action => if_elapsed("$(globals.default_ifelapsed)"),
+      perms => mog("755", "$(globals.default_user)", "$(globals.default_group)"),
+      create => "true";
+
+    "/opt/3ps/app/mongrel2/mongrel2.conf.template"
+      comment => "Install mongrel2 configuration template",
+      classes => if_repaired("mongrel2_conf_repaired"),
+      action => if_elapsed("$(globals.default_ifelapsed)"),
+      perms => mog("644", "$(globals.default_user)", "$(globals.default_group)"),
+      copy_from => remote_dcp("$(globals.masterfiles)/env/$(env)/mongrel2/mongrel2.conf.template", "$(sys.policy_hub)");
+
+    "/opt/3ps/app/mongrel2/mongrel2.conf"
+      comment => "Install mongrel2 configuration",
+      classes => if_repaired("mongrel2_conf_repaired"),
+      action => if_elapsed("$(globals.default_ifelapsed)"),
+      perms => mog("644", "$(globals.default_user)", "$(globals.default_group)"),
+      create => "true",
+      edit_defaults => mongrel2_edit_defaults,
+      edit_line => expand_template("/opt/3ps/app/mongrel2/mongrel2.conf.template");
+
+    "/opt/3ps/app/mongrel2/bin"
+      comment => "Sync mongrel2 bin directory",
+      perms => mog("755", "$(globals.default_user)", "$(globals.default_group)"),
+      action => if_elapsed("$(globals.default_ifelapsed)"),
+      copy_from => remote_dcp("$(globals.masterfiles)/env/$(env)/mongrel2/bin", "$(sys.policy_hub)"),
+      depth_search => recurse("inf");
+
+    "/opt/3ps/app/mongrel2/static"
+      comment => "Sync mongrel2 static directory",
+      perms => mog("644", "$(globals.default_user)", "$(globals.default_group)"),
+      action => if_elapsed("$(globals.default_ifelapsed)"),
+      copy_from => remote_dcp("$(globals.masterfiles)/env/$(env)/mongrel2/static", "$(sys.policy_hub)"),
+      depth_search => recurse("inf");
+
+commands:
+  #only auto-restart mongrel2 for localdev environment
+  #it's too risky in other environments.
+  sysgrp_cfengine.sysver_mongrel2_localdev.mongrel2_conf_repaired::
+
+    #The cmd_repair classes are necessary to ensure that the command will be executed.
+    #If unique classes are not given and the same command has already been executed in
+    #a previous promise, cfengine will optimize away the execution. This makes no sense,
+    #but this is a work around until we get an explanation from CF.
+    "/opt/3ps/app/mongrel2/bin/load"
+      contain => mongrel2_contain,
+      classes => cmd_repair("app_mongrel2_conf_load", "app_mongrel2_conf_load");
+
+    "/opt/3ps/app/mongrel2/bin/restart"
+      contain => mongrel2_start_contain,
+      classes => cmd_repair("app_mongrel2_conf_restart", "app_mongrel2_conf_restart");
+}
+
+body contain mongrel2_contain
+{
+exec_owner => "$(globals.default_user)";
+useshell => "true";
+chdir => "/opt/3ps/app/mongrel2";
+}
+
+body contain mongrel2_start_contain
+{
+exec_owner => "root";
+useshell => "false";
+chdir => "/opt/3ps/app/mongrel2";
+}
+
+body edit_defaults mongrel2_edit_defaults
+{
+empty_file_before_editing => "true";
+}

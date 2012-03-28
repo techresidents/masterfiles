@@ -1,0 +1,105 @@
+#Uncomment for testing: /var/cfengine/bin/cf-agent -K -I -f <full_path>
+#body common control {
+# bundlesequence => { "app_zookeeper" };
+#
+# inputs => { 
+#            "cfengine_stdlib.cf", 
+#            "globals.cf",
+#            "sys_versions.cf"
+#           };
+#}
+
+bundle agent app_zookeeper
+{
+
+vars:
+ "zookeeper_version" string => "3.3.5";
+
+ "zookeeper_packages" slist => {
+	"zookeeper",
+    "zookeeper-devel",
+    "zookeeper-python-devel"
+ };
+
+classes:
+ "sysgrp_cfengine" expression => classmatch("sysgrp_cfengine_.*");
+ "zookeeper" expression => classmatch("sysver_zookeeper_.*");
+ "restart_zookeeper" not => fileexists("/var/zookeeper/zookeeper_server.pid");
+
+packages:
+  sysgrp_cfengine.zookeeper::
+    "$(zookeeper_packages)"
+      comment => "Install zookeeper packages",
+      classes => if_repaired("zookeeper_installed"),        
+      action => if_elapsed("$(globals.default_ifelapsed)"),
+      package_policy => "add",
+      package_method => yum_ifelapsed;
+
+methods:
+  sysgrp_cfengine.zookeeper::
+    "any" usebundle => app_zookeeper_symlink("$(zookeeper_version)");
+
+  sysgrp_cfengine.sysver_zookeeper_localdev::
+    "any" usebundle => app_zookeeper_conf("localdev");
+
+  sysgrp_cfengine.sysver_zookeeper_integration::
+    "any" usebundle => app_zookeeper_conf("integration");
+
+  sysgrp_cfengine.sysver_zookeeper_staging::
+    "any" usebundle => app_zookeeper_conf("staging");
+
+  sysgrp_cfengine.sysver_zookeeper_prod::
+    "any" usebundle => app_zookeeper_conf("prod");
+
+commands:
+  sysgrp_cfengine.restart_zookeeper::
+    #The cmd_repair classes are necessary to ensure that the command will be executed.
+    #If unique classes are not given and the same command has already been executed in
+    #a previous promise, cfengine will optimize away the execution. This makes no sense,
+    #but this is a work around until we get an explanation from CF.
+    "/opt/3ps/app/zookeeper/bin/zkServer.sh restart"
+      classes => cmd_repair("app_zookeeper_restart", "app_zookeeper_restart");
+}
+
+
+bundle agent app_zookeeper_symlink(version)
+{
+files:
+    "/opt/3ps/app/zookeeper"
+      comment => "Create zookeeper symlink",
+      move_obstructions => "true",
+      link_from => ln_zookeeper("/opt/3ps/app/zookeeper-$(version)");
+}
+
+
+bundle agent app_zookeeper_conf(env)
+{
+classes:
+ "sysgrp_cfengine" expression => classmatch("sysgrp_cfengine_.*");
+
+files:
+    "/opt/3ps/app/zookeeper/conf/zoo.cfg"
+      comment => "Install zookeeper configuration zoo.cfg",
+      classes => if_repaired("zookeeper_conf_repaired"),
+      action => if_elapsed("$(globals.default_ifelapsed)"),
+      copy_from => remote_dcp("$(globals.masterfiles)/env/$(env)/zookeeper/conf/zoo.cfg", "$(sys.policy_hub)");
+
+commands:
+  #only auto-restart zookeeper for localdev environment
+  #it's too risky in other environments.
+  sysgrp_cfengine.sysver_zookeeper_localdev.zookeeper_conf_repaired::
+
+    #The cmd_repair classes are necessary to ensure that the command will be executed.
+    #If unique classes are not given and the same command has already been executed in
+    #a previous promise, cfengine will optimize away the execution. This makes no sense,
+    #but this is a work around until we get an explanation from CF.
+    "/opt/3ps/app/zookeeper/bin/zkServer.sh restart"
+      classes => cmd_repair("app_zookeeper_conf_restart", "app_zookeeper_conf_restart");
+}
+
+
+body link_from ln_zookeeper(source)
+{
+  link_type => "symlink";
+  source => "$(source)";
+}

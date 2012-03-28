@@ -104,6 +104,9 @@ vars:
     "zeromq",
     "zeromq-devel",
     "mongrel2",
+    "zookeeper",
+    "zookeeper-devel",
+    "zookeeper-python-devel",
     "cfengine-community"
  };
 
