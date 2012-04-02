@@ -23,6 +23,10 @@
         "packages" : ["zookeeper"]
     },
 
+    "riak" : {
+        "packages" : ["riak"]
+    },
+
     "services" : {
         "packages" : []
     }

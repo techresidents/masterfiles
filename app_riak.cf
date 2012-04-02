@@ -1,0 +1,99 @@
+#Uncomment for testing: /var/cfengine/bin/cf-agent -K -I -f <full_path>
+#body common control {
+# bundlesequence => { "app_riak" };
+#
+# inputs => { 
+#            "cfengine_stdlib.cf", 
+#            "globals.cf",
+#            "sys_versions.cf"
+#           };
+#}
+
+bundle agent app_riak
+{
+
+vars:
+
+ "riak_packages" slist => {
+	"riak"
+ };
+
+classes:
+ "sysgrp_cfengine" expression => classmatch("sysgrp_cfengine_.*");
+ "riak" expression => classmatch("sysver_riak_.*");
+
+packages:
+  sysgrp_cfengine.riak::
+    "$(riak_packages)"
+      comment => "Install Riak packages",
+      classes => if_repaired("riak_installed"),        
+      action => if_elapsed("$(globals.default_ifelapsed)"),
+      package_policy => "add",
+      package_method => yum_ifelapsed;
+
+methods:
+  sysgrp_cfengine.sysver_riak_localdev::
+    "any" usebundle => app_riak_conf("localdev");
+
+  sysgrp_cfengine.sysver_riak_integration::
+    "any" usebundle => app_riak_conf("integration");
+
+  sysgrp_cfengine.sysver_riak_staging::
+    "any" usebundle => app_riak_conf("staging");
+
+  sysgrp_cfengine.sysver_riak_prod::
+    "any" usebundle => app_riak_conf("prod");
+
+processes:
+  sysgrp_cfengine.riak::
+    "riak"
+      comment => "Ensure riak is running",
+      action => if_elapsed(1),
+      restart_class => "restart_riak";
+
+commands:
+  sysgrp_cfengine.riak.riak_installed::
+    "/sbin/chkconfig riak on";
+
+  sysgrp_cfengine.restart_riak::
+    #The cmd_repair classes are necessary to ensure that the command will be executed.
+    #If unique classes are not given and the same command has already been executed in
+    #a previous promise, cfengine will optimize away the execution. This makes no sense,
+    #but this is a work around until we get an explanation from CF.
+    "/sbin/service riak restart"
+      classes => cmd_repair("app_riak_restart", "app_riak_restart");
+}
+
+
+bundle agent app_riak_conf(env)
+{
+classes:
+ "sysgrp_cfengine" expression => classmatch("sysgrp_cfengine_.*");
+
+files:
+    "/etc/riak/app.config"
+      comment => "Install Riak configuration app.config",
+      classes => if_repaired("riak_conf_repaired"),
+      action => if_elapsed("$(globals.default_ifelapsed)"),
+      perms => mog("644", "riak", "riak"),
+      copy_from => remote_dcp("$(globals.masterfiles)/env/$(env)/riak/app.config", "$(sys.policy_hub)");
+
+    "/etc/riak/vm.args"
+      comment => "Install riak configuration vm.args",
+      classes => if_repaired("riak_conf_repaired"),
+      action => if_elapsed("$(globals.default_ifelapsed)"),
+      perms => mog("644", "riak", "riak"),
+      copy_from => remote_dcp("$(globals.masterfiles)/env/$(env)/riak/vm.args", "$(sys.policy_hub)");
+
+commands:
+  #only auto-restart riak for localdev environment
+  #it's too risky in other environments.
+  sysgrp_cfengine.sysver_riak_localdev.riak_conf_repaired::
+
+    #The cmd_repair classes are necessary to ensure that the command will be executed.
+    #If unique classes are not given and the same command has already been executed in
+    #a previous promise, cfengine will optimize away the execution. This makes no sense,
+    #but this is a work around until we get an explanation from CF.
+    "/sbin/service riak restart"
+      classes => cmd_repair("app_riak_conf_restart", "app_riak_conf_restart");
+}

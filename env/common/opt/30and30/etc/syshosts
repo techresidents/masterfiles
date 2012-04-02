@@ -1,6 +1,6 @@
 {
     "localdev" : {
         "envs" : ["localdev"],
-        "groups" : ["all", "cfengine", "web", "database", "zookeeper"]
+        "groups" : ["all", "cfengine", "web", "database", "zookeeper", "riak"]
     }
 }
