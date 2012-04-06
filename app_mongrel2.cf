@@ -15,7 +15,8 @@ bundle agent app_mongrel2
 vars:
 
 "mongrel2_uuid" string => hash("$(sys.host)m2_uuid", "sha1");
-"mongrel2_chat_send_ident" string => hash("$(sys.host)m2_chat_send_ident", "sha1");
+"mongrel2_chatsvc_send_ident" string => hash("$(sys.host)m2_chatsvc_send_ident", "sha1");
+"mongrel2_lookupsvc_send_ident" string => hash("$(sys.host)m2_lookupsvc_send_ident", "sha1");
 
  "mongrel2_packages" slist => {
 	"mongrel2"

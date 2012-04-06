@@ -2,14 +2,20 @@ static_dir = Dir(base='static/',
                  index_file='index.html', 
                  default_ctype='text/plain')
 
-handler_chat = Handler(send_spec='tcp://*:9997',
-                       send_ident='$(app_mongrel2.mongrel2_chat_send_ident)',
-                       recv_spec='tcp://*:9996', recv_ident='')
+
+lookupsvc_handler = Handler(send_spec='tcp://0.0.0.0:9999',
+                       send_ident='$(app_mongrel2.mongrel2_lookupsvc_send_ident)',
+                       recv_spec='tcp://0.0.0.0:9998', recv_ident='')
+
+chatsvc_handler = Handler(send_spec='tcp://0.0.0.0:9997',
+                       send_ident='$(app_mongrel2.mongrel2_chatsvc_send_ident)',
+                       recv_spec='tcp://0.0.0.0:9996', recv_ident='')
 
 # your main host
 localhost = Host(name="localhost", routes={
     '/static/': static_dir,
-    '/chat': handler_chat
+    '/chat': chatsvc_handler,
+    '/lookup': lookupsvc_handler,
 })
 
 # the server to run them all
