@@ -14,8 +14,8 @@ chatsvc_handler = Handler(send_spec='tcp://0.0.0.0:9997',
 # your main host
 localhost = Host(name="localhost", routes={
     '/static/': static_dir,
-    '/chat': chatsvc_handler,
-    '/lookup': lookupsvc_handler
+    '/chat/': chatsvc_handler,
+    '/lookup/': lookupsvc_handler
 })
 
 # the server to run them all
