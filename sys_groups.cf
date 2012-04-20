@@ -13,8 +13,10 @@
 bundle agent sysgrp
 {
 vars:
+    "sysgrp_unique" string => concat("sysgrp_unique_", now());      
 
 commands:
   "$(globals.sysutil) groups -H localhost --format '+sysgrp_{group}_{env}'"
+    classes => cmd_repair("$(sysgrp_unique)", "$(sysgrp_unique)"),
     module => "true";
 }
