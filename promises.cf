@@ -22,6 +22,7 @@ body common control
                     "app_apache",
                     "app_techresidents_web",
                     "app_chatsvc",
+                    "app_lookupsvc",
                     "app_mongrel2"
                    };
 
@@ -43,6 +44,7 @@ body common control
             "app_apache.cf",     
             "app_techresidents_web.cf",
             "app_chatsvc.cf",
+            "app_lookupsvc.cf",
             "app_mongrel2.cf"
            };
 
