@@ -254,7 +254,7 @@
             "localdev" : {
                 "groups" : {
                     "all" : {
-                        "version" : "0.1",
+                        "version" : "0.2.0",
                         "release" : "1"
                     }
                 }
@@ -263,7 +263,7 @@
             "integration" : {
                 "groups" : {
                     "all" : {
-                        "version" : "0.1",
+                        "version" : "0.2.0",
                         "release" : "1"
                     }
                 }
@@ -272,7 +272,7 @@
             "staging" : {
                 "groups" : {
                     "all" : {
-                        "version" : "0.1",
+                        "version" : "0.2.0",
                         "release" : "1"
                     }
                 }
@@ -281,11 +281,53 @@
             "prod" : {
                 "groups" : {
                     "all" : {
-                        "version" : "0.1",
+                        "version" : "0.2.0",
+                        "release" : "1"
+                    }
+                }
+            }
+        }
+    },
+
+
+    "lookupsvc" : {
+        "envs" : {
+            "localdev" : {
+                "groups" : {
+                    "all" : {
+                        "version" : "0.2.0",
+                        "release" : "1"
+                    }
+                }
+            },
+
+            "integration" : {
+                "groups" : {
+                    "all" : {
+                        "version" : "0.2.0",
+                        "release" : "1"
+                    }
+                }
+            },
+
+            "staging" : {
+                "groups" : {
+                    "all" : {
+                        "version" : "0.2.0",
+                        "release" : "1"
+                    }
+                }
+            },
+
+            "prod" : {
+                "groups" : {
+                    "all" : {
+                        "version" : "0.2.0",
                         "release" : "1"
                     }
                 }
             }
         }
     }
+
 }
