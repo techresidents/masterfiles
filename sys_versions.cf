@@ -16,9 +16,18 @@
 
 bundle agent sysver
 {
+vars:
+    "sysver_unique" string => concat("sysver_unique_", now());      
+
 commands:
+  #The cmd_repair classes are necessary to ensure that the command will be executed.
+  #If unique classes are not given and the same command has already been executed in
+  #a previous promise, cfengine will optimize away the execution. This makes no sense,
+  #but this is a work around until we get an explanation from CF.
   "$(globals.sysutil) packages -H localhost --format '+sysver_{package}_{env}\n={package}_{env}_version={version}\n={package}_{env}_release={release}'",
+    classes => cmd_repair("$(sysver_unique)", "$(sysver_unique)"),
     module => "true";
+
 reports:
  localdev::
   "$(sysver.apache_localdev_version)";
