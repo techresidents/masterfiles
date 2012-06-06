@@ -74,11 +74,11 @@
                         error: function(msg){
                             throw new Error(msg);
                         },
-                        data: {},
+                        data: undefined,
+                        processData: true,
                         timeout: 10 * 1000
                     }, true);
                     
-                    var isPOST = config.method == "POST";
                     
                     // convert the data into a format we can send to the server 
                     var pairs = [];
@@ -87,11 +87,13 @@
                             pairs.push(encodeURIComponent(key) + "=" + encodeURIComponent(config.data[key]));
                         }
                     }
-                    var data = pairs.join("&");
+
+                    var isGET = config.method == "GET";
+                    data = config.processData ? pairs.join("&") : config.data;
                     
                     // create the XMLHttpRequest object
                     var req = getXhr();
-                    req.open(config.method, config.url + (isPOST ? "" : "?" + data), true);
+                    req.open(config.method, config.url + (isGET ? "?" + data : ""), true);
                     
                     // apply the request headers
                     for (var prop in config.headers) {
@@ -187,7 +189,7 @@
                     };
                     
                     // issue the request
-                    req.send(isPOST ? data : "");
+                    req.send(isGET ? "" : data);
                 }
             }
         });
