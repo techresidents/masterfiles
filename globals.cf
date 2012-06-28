@@ -2,31 +2,36 @@ bundle common globals
 {
 vars:
 
+ "masterfiles" string => "/var/cfengine/masterfiles";
+ "our_root" string => "/opt/tr";
+ "our_repo" string => "tr";
+ "our_domain" string => "techresidents.com";
+ "third_party_root" string => "/opt/3ps";
+
  "default_user" string => "500";
  "default_user_id" string => "500";
- "default_user_name" string => "thirty";
+ "default_user_name" string => "tr";
 
  "default_group" string => "500";
  "default_group_id" string => "500";
- "default_group_name" string => "thirty";
+ "default_group_name" string => "tr";
 
  "default_ifelapsed" int => "240";
  "default_package_ifelapsed" int => "240";
 
- "default_profile" string => "/opt/3ps/etc/profile";
+ "default_profile" string => "$(our_root)/etc/profile";
  "default_profile_lines" string => 
-   ". /opt/30and30/etc/profile"
+   ". $(our_root)/etc/profile"
  ;
 
- "default_3ps_profile" string => "/opt/3ps/etc/profile";
+ "default_3ps_profile" string => "$(third_party_root)/etc/profile";
  "default_3ps_profile_lines" string => 
-   ". /opt/3ps/etc/profile"
+   ". $(third_party_root)/etc/profile"
  ;
 
 
- "masterfiles" string => "/var/cfengine/masterfiles";
- "sysutil" string => "/opt/3ps/bin/python /opt/30and30/bin/sysutil.py";
- "rpm_repo" string => "/opt/30and30/centos/centos-5.7/rpm/repo";
+ "sysutil" string => "$(third_party_root)/bin/python $(our_root)/bin/sysutil.py";
+ "rpm_repo" string => "$(our_root)/centos/centos-5.7/rpm/repo";
  "source_profile" string => ". $(default_profile)";
  "source_3ps_profile" string => ". $(default_3ps_profile)";
 }

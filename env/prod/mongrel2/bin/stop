@@ -1,0 +1,5 @@
+#!/bin/bash
+. /opt/3ps/etc/profile
+
+cd /opt/3ps/app/mongrel2
+/opt/3ps/bin/m2sh stop --host localhost

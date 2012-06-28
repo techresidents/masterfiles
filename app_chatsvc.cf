@@ -15,8 +15,8 @@ bundle agent app_chatsvc
 {
 
 vars:
- "service_root" string => "/opt/30and30/services";
- "service_data_root" string => "/opt/30and30/data";
+ "service_root" string => "$(globals.our_root)/services";
+ "service_data_root" string => "$(globals.our_root)/data";
  "service" string => "chatsvc";
  "service_arch" string => "x86_64";
 

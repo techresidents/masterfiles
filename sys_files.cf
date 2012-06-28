@@ -24,25 +24,25 @@ files:
 #With the exception of hosts that are in the sysgrp_opt_out. This should only be localdev boxes
 #which are testing non-standard versions.
   !sysgrp_opt_out::
-    "/opt/3ps/etc"
-      comment => "Sync /opt/3ps/etc directory",
+    "$(globals.third_party_root)/etc"
+      comment => "Sync $(globals.third_party_root)/etc directory",
       perms => mog("644", "root", "root"),
       action => if_elapsed("$(globals.default_ifelapsed)"),
-      copy_from => remote_dcp("$(globals.masterfiles)/env/common/opt/3ps/etc", "$(sys.policy_hub)"),
+      copy_from => remote_dcp("$(globals.masterfiles)/env/common$(globals.third_party_root)/etc", "$(sys.policy_hub)"),
       depth_search => recurse("inf");
 
-    "/opt/30and30/etc"
-      comment => "Sync /opt/30and30/etc directory",
+    "$(globals.our_root)/etc"
+      comment => "Sync $(globals.our_root)/etc directory",
       perms => mog("644", "root", "root"),
       action => if_elapsed("$(globals.default_ifelapsed)"),
-      copy_from => remote_dcp("$(globals.masterfiles)/env/common/opt/30and30/etc", "$(sys.policy_hub)"),
+      copy_from => remote_dcp("$(globals.masterfiles)/env/common$(globals.our_root)/etc", "$(sys.policy_hub)"),
       depth_search => recurse("inf");
 
-    "/opt/30and30/bin"
-      comment => "Sync /opt/30and30/bin directory",
+    "$(globals.our_root)/bin"
+      comment => "Sync $(globals.our_root)/bin directory",
       perms => mog("755", "root", "root"),
       action => if_elapsed("$(globals.default_ifelapsed)"),
-      copy_from => remote_dcp("$(globals.masterfiles)/env/common/opt/30and30/bin", "$(sys.policy_hub)"),
+      copy_from => remote_dcp("$(globals.masterfiles)/env/common$(globals.our_root)/bin", "$(sys.policy_hub)"),
       depth_search => recurse("inf");
 
     "/etc/ld.so.conf.d"

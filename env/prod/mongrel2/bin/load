@@ -1,0 +1,4 @@
+#!/bin/bash
+
+. /opt/3ps/etc/profile
+/opt/3ps/bin/m2sh load --db /opt/3ps/app/mongrel2/config.sqlite --config /opt/3ps/app/mongrel2/mongrel2.conf

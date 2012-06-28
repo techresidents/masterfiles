@@ -14,7 +14,7 @@ bundle agent app_techresidents_web
 {
 
 vars:
- "web_root" string => "/opt/30and30/www";
+ "web_root" string => "$(globals.our_root)/www";
  "web_site" string => "techresidents.com";
  "web_app" string => "techresidents_web";
  "web_app_arch" string => "x86_64";

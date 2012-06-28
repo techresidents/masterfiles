@@ -12,5 +12,5 @@ files:
     comment => "Comment",
     perms => mog("644", "root", "root"),
     action => if_elapsed(240),
-    copy_from => remote_dcp("/opt/30and30/etc/profile", "$(sys.policy_hub)");
+    copy_from => remote_dcp("/opt/tr/etc/profile", "$(sys.policy_hub)");
 }

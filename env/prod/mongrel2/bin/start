@@ -1,0 +1,5 @@
+#!/bin/bash
+
+. /opt/3ps/etc/profile
+cd /opt/3ps/app/mongrel2
+nohup /opt/3ps/bin/m2sh start --db /opt/3ps/app/mongrel2/config.sqlite --host localhost --sudo > /dev/null 2>&1

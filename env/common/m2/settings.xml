@@ -4,7 +4,7 @@
       <!--This sends everything else to /public -->
       <id>nexus</id>
       <mirrorOf>*</mirrorOf>
-      <url>http://nexus.dev.30and30.com/content/groups/public</url>
+      <url>http://nexus.dev.techresidents.com/content/groups/public</url>
     </mirror>
   </mirrors>
   <profiles>

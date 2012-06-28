@@ -78,7 +78,7 @@ files:
       copy_from => remote_dcp("$(postgresql_yum_repo_path)", "$(sys.policy_hub)");
 
     "/var/lib/pgsql/.bash_profile"
-      comment => "Source /opt/3ps/etc/profile in postgres bash_profile",
+      comment => "Source 3ps profile in postgres bash_profile",
       create => "false",
       edit_line => append_if_no_lines("$(globals.default_3ps_profile_lines)");
 

@@ -57,7 +57,7 @@ commands:
     #If unique classes are not given and the same command has already been executed in
     #a previous promise, cfengine will optimize away the execution. This makes no sense,
     #but this is a work around until we get an explanation from CF.
-    "/opt/3ps/app/zookeeper/bin/zkServer.sh restart"
+    "$(globals.third_party_root)/app/zookeeper/bin/zkServer.sh restart"
       classes => cmd_repair("app_zookeeper_restart", "app_zookeeper_restart");
 }
 
@@ -65,10 +65,10 @@ commands:
 bundle agent app_zookeeper_symlink(version)
 {
 files:
-    "/opt/3ps/app/zookeeper"
+    "$(globals.third_party_root)/app/zookeeper"
       comment => "Create zookeeper symlink",
       move_obstructions => "true",
-      link_from => ln_zookeeper("/opt/3ps/app/zookeeper-$(version)");
+      link_from => ln_zookeeper("$(globals.third_party_root)/app/zookeeper-$(version)");
 }
 
 
@@ -78,7 +78,7 @@ classes:
  "sysgrp_cfengine" expression => classmatch("sysgrp_cfengine_.*");
 
 files:
-    "/opt/3ps/app/zookeeper/conf/zoo.cfg"
+    "$(globals.third_party_root)/app/zookeeper/conf/zoo.cfg"
       comment => "Install zookeeper configuration zoo.cfg",
       classes => if_repaired("zookeeper_conf_repaired"),
       action => if_elapsed("$(globals.default_ifelapsed)"),
@@ -93,7 +93,7 @@ commands:
     #If unique classes are not given and the same command has already been executed in
     #a previous promise, cfengine will optimize away the execution. This makes no sense,
     #but this is a work around until we get an explanation from CF.
-    "/opt/3ps/app/zookeeper/bin/zkServer.sh restart"
+    "$(globals.third_party_root)/app/zookeeper/bin/zkServer.sh restart"
       classes => cmd_repair("app_zookeeper_conf_restart", "app_zookeeper_conf_restart");
 }
 

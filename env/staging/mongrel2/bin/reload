@@ -1,0 +1,4 @@
+#!/bin/bash
+
+. /opt/3ps/etc/profile
+/opt/3ps/bin/m2sh reload --db /opt/3ps/app/mongrel2/config.sqlite --host localhost

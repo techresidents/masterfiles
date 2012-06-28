@@ -15,40 +15,40 @@ vars:
 classes:
  "sysgrp_cfengine" expression => classmatch("sysgrp_cfengine_.*");
 
- "python_setuptools_needed" not => fileexists("/opt/3ps/lib/python2.7/site-packages/setuptools.pth");
- "python_pip_needed" not => fileexists("/opt/3ps/bin/pip");
- "python_virtualenv_needed" not => fileexists("/opt/3ps/bin/virtualenv");
- "python_virtualenv_wrapper_needed" not => fileexists("/opt/3ps/bin/virtualenvwrapper.sh");
- "python_baseline_needed" not => fileexists("/opt/30and30/baseline-python2.7");
+ "python_setuptools_needed" not => fileexists("$(globals.third_party_root)/lib/python2.7/site-packages/setuptools.pth");
+ "python_pip_needed" not => fileexists("$(globals.third_party_root)/bin/pip");
+ "python_virtualenv_needed" not => fileexists("$(globals.third_party_root)/bin/virtualenv");
+ "python_virtualenv_wrapper_needed" not => fileexists("$(globals.third_party_root)/bin/virtualenvwrapper.sh");
+ "python_baseline_needed" not => fileexists("$(globals.our_root)/baseline-python2.7");
 
- "nodejs_rjs_needed" not => fileexists("/opt/3ps/bin/r.js");
+ "nodejs_rjs_needed" not => fileexists("$(globals.third_party_root)/bin/r.js");
 
 commands:
   sysgrp_cfengine.python_setuptools_needed::
     "$(globals.source_profile); /usr/bin/wget http://pypi.python.org/packages/2.7/s/setuptools/setuptools-0.6c11-py2.7.egg"
       contain => shell;
 
-    "$(globals.source_profile); /bin/sh setuptools-0.6c11-py2.7.egg --prefix=/opt/3ps"
+    "$(globals.source_profile); /bin/sh setuptools-0.6c11-py2.7.egg --prefix=$(globals.third_party_root)"
       contain => shell;
 
   sysgrp_cfengine.python_pip_needed::
-    "$(globals.source_profile); /opt/3ps/bin/easy_install pip"
+    "$(globals.source_profile); $(globals.third_party_root)/bin/easy_install pip"
       contain => shell;
 
   sysgrp_cfengine.python_virtualenv_needed::
-    "$(globals.source_profile); /opt/3ps/bin/pip install virtualenv"
+    "$(globals.source_profile); $(globals.third_party_root)/bin/pip install virtualenv"
       contain => shell;
 
   sysgrp_cfengine.python_virtualenv_wrapper_needed::
-    "$(globals.source_profile); /opt/3ps/bin/pip install virtualenvwrapper"
+    "$(globals.source_profile); $(globals.third_party_root)/bin/pip install virtualenvwrapper"
       contain => shell;
 
   sysgrp_cfengine.python_baseline_needed::
-    "$(globals.source_profile); /opt/3ps/bin/virtualenv --no-site-packages /opt/30and30/baseline-python2.7"
+    "$(globals.source_profile); $(globals.third_party_root)/bin/virtualenv --no-site-packages $(globals.our_root)/baseline-python2.7"
       contain => shell;
 
   sysgrp_cfengine.nodejs_rjs_needed::
-    "$(globals.source_profile); /opt/3ps/bin/npm install -g requirejs"
+    "$(globals.source_profile); $(globals.third_party_root)/bin/npm install -g requirejs"
       contain => shell;
 }
 
