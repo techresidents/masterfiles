@@ -173,8 +173,8 @@ bundle server access_rules()
       comment => "Grant access to the policy updates",
       admit   => { ".*$(def.domain)", @(def.acl) };
    
-   "$(our_root)"
-      comment => "Grant access to $(our_root)",
+   "$(globals.our_root)"
+      comment => "Grant access to $(globals.our_root)",
       admit   => { ".*$(def.domain)", @(def.acl) };
 
 # Uncomment the promise below to allow cf-runagent to
