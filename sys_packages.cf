@@ -196,8 +196,8 @@ package_patch_name_regex    => "([^.]+).*";
 package_patch_version_regex => "[^\s]\s+([^\s]+).*";
 package_patch_arch_regex    => "[^.]+\.([^\s]+).*";
 
-package_add_command => "/usr/bin/yum --disablerepo=* --enablerepo=$(our_repo) -y install";
-package_update_command => "/usr/bin/yum --disablerepo=* --enablerepo=$(our_repo) -y update";
+package_add_command => "/usr/bin/yum --disablerepo=* --enablerepo=$(globals.our_repo) -y install";
+package_update_command => "/usr/bin/yum --disablerepo=* --enablerepo=$(globals.our_repo) -y update";
 package_delete_command => "/bin/rpm -e --nodeps";
 package_verify_command => "/bin/rpm -V";
 }
