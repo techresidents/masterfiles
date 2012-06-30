@@ -75,7 +75,7 @@ bundle common def
 
   # Begin change # Your domain name, for use in access control
 
-     "domain"  string => "$(our_domain)",
+     "domain"  string => "$(globals.our_domain)",
               comment => "Define a global domain for all hosts",
                handle => "common_def_vars_domain";
 
