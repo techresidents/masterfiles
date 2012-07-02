@@ -28,6 +28,6 @@
     },
 
     "services" : {
-        "packages" : ["lookupsvc"]
+        "packages" : ["lookupsvc", "schedulesvc"]
     }
 }
