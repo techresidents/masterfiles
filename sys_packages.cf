@@ -60,7 +60,9 @@ vars:
 	"boost-devel",
     "glib2-devel",
     "ncurses-devel",
-    #"compat-libevent14-devel",
+    #Note that postgres will replace libevent-devel with compat-libevent14-devel
+    #for pg bouncer compatability.
+    "libevent-devel"
     "tcl-devel",
     "postgresql91-devel",
 	"git",
