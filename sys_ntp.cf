@@ -1,0 +1,54 @@
+#Uncomment for testing: /var/cfengine/bin/cf-agent -K -I -f <full_path>
+#body common control {
+# bundlesequence => { "sys_ntp" };
+#
+# inputs => { 
+#            "cfengine_stdlib.cf", 
+#            "globals.cf",
+#            "sys_groups.cf"
+#           };
+#}
+
+bundle agent sys_ntp
+{
+
+vars:
+
+ "ntp_packages" slist => {
+	"ntp"
+ };
+
+classes:
+ "sysgrp_cfengine" expression => classmatch("sysgrp_cfengine_.*");
+ "ntp" expression => classmatch("sysgrp_ntp_.*");
+
+packages:
+  sysgrp_cfengine.ntp::
+    "$(ntp_packages)"
+      comment => "Install ntp packages",
+      classes => if_repaired("ntp_installed"),        
+      action => if_elapsed("$(globals.default_ifelapsed)"),
+      package_policy => "add",
+      package_method => yum_ifelapsed;
+
+processes:
+  sysgrp_cfengine.ntp::
+    "ntpd"
+      comment => "Ensure ntpd is running",
+      action => if_elapsed(1),
+      restart_class => "restart_ntpd";
+
+commands:
+  sysgrp_cfengine.ntp.ntp_installed::
+    "/sbin/chkconfig ntpd on";
+
+    "/sbin/ntpdate pool.ntp.org";
+
+  sysgrp_cfengine.restart_ntpd::
+    #The cmd_repair classes are necessary to ensure that the command will be executed.
+    #If unique classes are not given and the same command has already been executed in
+    #a previous promise, cfengine will optimize away the execution. This makes no sense,
+    #but this is a work around until we get an explanation from CF.
+    "/sbin/service ntpd restart"
+      classes => cmd_repair("sys_ntp_restart", "sys_ntp_restart");
+}

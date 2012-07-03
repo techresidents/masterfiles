@@ -11,6 +11,10 @@
         "packages" : []
     },
 
+    "ntp" : {
+        "packages" : []
+    },
+
     "web" : {
         "packages" : ["apache", "techresidents_web", "mongrel2", "chatsvc"]
     },
