@@ -32,15 +32,15 @@ commands:
       contain => shell;
 
   sysgrp_cfengine.python_pip_needed::
-    "$(globals.source_profile); $(globals.third_party_root)/bin/easy_install pip"
+    "$(globals.source_profile); $(globals.third_party_root)/bin/easy_install pip==1.1"
       contain => shell;
 
   sysgrp_cfengine.python_virtualenv_needed::
-    "$(globals.source_profile); $(globals.third_party_root)/bin/pip install virtualenv"
+    "$(globals.source_profile); $(globals.third_party_root)/bin/pip install virtualenv==1.7.2"
       contain => shell;
 
   sysgrp_cfengine.python_virtualenv_wrapper_needed::
-    "$(globals.source_profile); $(globals.third_party_root)/bin/pip install virtualenvwrapper"
+    "$(globals.source_profile); $(globals.third_party_root)/bin/pip install virtualenvwrapper==3.5"
       contain => shell;
 
   sysgrp_cfengine.python_baseline_needed::
@@ -48,7 +48,7 @@ commands:
       contain => shell;
 
   sysgrp_cfengine.nodejs_rjs_needed::
-    "$(globals.source_profile); $(globals.third_party_root)/bin/npm install -g requirejs"
+    "$(globals.source_profile); $(globals.third_party_root)/bin/npm install -g requirejs@1.0.8"
       contain => shell;
 }
 
