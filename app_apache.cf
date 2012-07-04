@@ -73,7 +73,8 @@ classes:
 files:
     "/etc/httpd/conf.d/ssl.conf"
       comment => "Disable ssl.conf by renaming it to ssl.conf.unused",
-      action => if_elapsed("$(globals.default_ifelapsed)"),
+      classes => if_repaired("apache_conf_repaired"),
+      action => if_elapsed(1),
       rename => to("/etc/httpd/conf.d/ssl.conf.unused");
 
     "/etc/httpd/conf/httpd.conf"
