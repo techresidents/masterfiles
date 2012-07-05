@@ -88,7 +88,8 @@ packages:
   "$(dev_libevent_packages)"
     comment => "Install dev libevent packages",
     action => if_elapsed("$(globals.default_ifelapsed)"),
-    package_version => "2*",
+    package_version => "2.0.12",
+    package_architectures => { "x86_64" },
     package_policy => "add",
     package_method => yum_ifelapsed;
 }
