@@ -28,5 +28,6 @@ then
     result=$?
 fi
 
+echo $result
 exit $result
 

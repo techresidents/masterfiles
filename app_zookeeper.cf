@@ -21,10 +21,12 @@ vars:
     "zookeeper-python-devel"
  };
 
+ "zookeeer_up" string => execresult("$(globals.our_root)/bin/pidfile_proc_up.sh /var/zookeeper/zookeeper_server.pid zookeeper", "noshell");
+
 classes:
  "sysgrp_cfengine" expression => classmatch("sysgrp_cfengine_.*");
  "zookeeper" expression => classmatch("sysver_zookeeper_.*");
- "restart_zookeeper" not => fileexists("/var/zookeeper/zookeeper_server.pid");
+ "restart_zookeeper" not => strcmp("$(zookeeper_up)", "0"); 
 
 packages:
   sysgrp_cfengine.zookeeper::
