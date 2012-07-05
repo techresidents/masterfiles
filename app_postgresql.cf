@@ -46,7 +46,7 @@ commands:
     #a previous promise, cfengine will optimize away the execution. This makes no sense,
     #but this is a work around until we get an explanation from CF.
     "/sbin/service postgresql-9.1 restart"
-      action = if_elapsed(1),
+      action => if_elapsed(1),
       classes => cmd_repair("app_postgresql_restart", "app_postgresql_restart");
 }
 
@@ -110,20 +110,20 @@ commands:
     #a previous promise, cfengine will optimize away the execution. This makes no sense,
     #but this is a work around until we get an explanation from CF.
     "/sbin/service postgresql-9.1 restart"
-      action = if_elapsed(1),
+      action => if_elapsed(1),
       classes => cmd_repair("app_postgresql_packages_restart", "app_postgresql_packages_restart");
 
     #Wait for postgres to startup
     "/bin/sleep 30"
-      action = if_elapsed(1),
+      action => if_elapsed(1),
       classes => cmd_repair("app_postgresql_packages_sleep", "app_postgresql_packages_sleep");
 
     "/usr/pgsql-9.1/bin/psql -c \"CREATE ROLE postgres\""
-      action = if_elapsed(1),
+      action => if_elapsed(1),
       contain => postgresql_contain;
 
     "/usr/pgsql-9.1/bin/psql -c \"ALTER ROLE postgres with SUPERUSER INHERIT CREATEROLE CREATEDB LOGIN PASSWORD 'md5d567c3bd5b5af9c0b4f16da9320a0dac'\""
-      action = if_elapsed(1),
+      action => if_elapsed(1),
       contain => postgresql_contain;
 
     "/sbin/chkconfig postgresql-9.1 on";
@@ -166,7 +166,7 @@ commands:
     #a previous promise, cfengine will optimize away the execution. This makes no sense,
     #but this is a work around until we get an explanation from CF.
     "/sbin/service postgresql-9.1 restart"
-      action = if_elapsed(1),
+      action => if_elapsed(1),
       classes => cmd_repair("app_postgresql_conf_restart", "app_postgresql_conf_restart");
 }
 

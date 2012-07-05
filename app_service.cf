@@ -55,7 +55,7 @@ commands:
     #a previous promise, cfengine will optimize away the execution. This makes no sense,
     #but this is a work around until we get an explanation from CF.
     "$(service_root)/$(service)/$(env)/$(service)/bin/restart $(env)"
-      action = if_elapsed(1),
+      action => if_elapsed(1),
       classes => cmd_repair("app_$(service)_$(env)_conf_restart", "app_$(service)_$(env)_conf_restart");
 }
 
@@ -73,7 +73,7 @@ commands:
     #a previous promise, cfengine will optimize away the execution. This makes no sense,
     #but this is a work around until we get an explanation from CF.
     "$(service_root)/$(service)/$(env)/$(service)/bin/restart $(env)"
-      action = if_elapsed(1),
+      action => if_elapsed(1),
       classes => cmd_repair("app_$(service)_$(env)_run_restart", "app_$(service)_$(env)_run_restart");
 }
 

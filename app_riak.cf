@@ -61,7 +61,7 @@ commands:
     #a previous promise, cfengine will optimize away the execution. This makes no sense,
     #but this is a work around until we get an explanation from CF.
     "/sbin/service riak restart"
-      action = if_elapsed(1),
+      action => if_elapsed(1),
       classes => cmd_repair("app_riak_restart", "app_riak_restart");
 }
 
@@ -96,6 +96,6 @@ commands:
     #a previous promise, cfengine will optimize away the execution. This makes no sense,
     #but this is a work around until we get an explanation from CF.
     "/sbin/service riak restart"
-      action = if_elapsed(1),
+      action => if_elapsed(1),
       classes => cmd_repair("app_riak_conf_restart", "app_riak_conf_restart");
 }
