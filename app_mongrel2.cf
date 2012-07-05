@@ -62,6 +62,7 @@ commands:
     #a previous promise, cfengine will optimize away the execution. This makes no sense,
     #but this is a work around until we get an explanation from CF.
     "$(globals.third_party_root)/app/mongrel2/bin/restart"
+      action = if_elapsed(1),
       contain => mongrel2_start_contain,
       classes => cmd_repair("app_mongrel2_restart", "app_mongrel2_restart");
 }
@@ -138,10 +139,12 @@ commands:
     #but this is a work around until we get an explanation from CF.
     "$(globals.third_party_root)/app/mongrel2/bin/load"
       contain => mongrel2_contain,
+      action = if_elapsed(1),
       classes => cmd_repair("app_mongrel2_conf_load", "app_mongrel2_conf_load");
 
     "$(globals.third_party_root)/app/mongrel2/bin/restart"
       contain => mongrel2_start_contain,
+      action = if_elapsed(1),
       classes => cmd_repair("app_mongrel2_conf_restart", "app_mongrel2_conf_restart");
 }
 

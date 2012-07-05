@@ -60,6 +60,7 @@ commands:
     #a previous promise, cfengine will optimize away the execution. This makes no sense,
     #but this is a work around until we get an explanation from CF.
     "$(globals.third_party_root)/app/zookeeper/bin/zkServer.sh restart"
+      action => if_elapsed(1),
       classes => cmd_repair("app_zookeeper_restart", "app_zookeeper_restart");
 }
 
@@ -96,6 +97,7 @@ commands:
     #a previous promise, cfengine will optimize away the execution. This makes no sense,
     #but this is a work around until we get an explanation from CF.
     "$(globals.third_party_root)/app/zookeeper/bin/zkServer.sh restart"
+      action => if_elapsed(1),
       classes => cmd_repair("app_zookeeper_conf_restart", "app_zookeeper_conf_restart");
 }
 
