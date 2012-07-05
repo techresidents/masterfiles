@@ -21,6 +21,7 @@ methods:
  sysgrp_cfengine::
     "any" usebundle => sys_packages_core;
     "any" usebundle => sys_packages_devel;
+    "any" usebundle => sys_packages_devel_libevent;
     "any" usebundle => sys_packages_java;
     "any" usebundle => sys_packages_ours;
 }
@@ -60,9 +61,6 @@ vars:
 	"boost-devel",
     "glib2-devel",
     "ncurses-devel",
-    #Note that postgres will replace libevent-devel with compat-libevent14-devel
-    #for pg bouncer compatability.
-    "libevent-devel",
     "tcl-devel",
     "postgresql91-devel",
 	"git",
@@ -73,6 +71,24 @@ packages:
   "$(dev_packages)"
     comment => "Install dev packages",
     action => if_elapsed("$(globals.default_ifelapsed)"),
+    package_policy => "add",
+    package_method => yum_ifelapsed;
+}
+
+bundle agent sys_packages_devel_libevent
+{
+vars:
+ "dev_libevent_packages" slist => {
+    #Note that postgres will replace libevent-1.4 with compat-libevent14
+    #for pg bouncer compatability. Additionally, libevent2 will be installed.
+    "libevent-devel",
+ };
+
+packages:
+  "$(dev_libevent_packages)"
+    comment => "Install dev libevent packages",
+    action => if_elapsed("$(globals.default_ifelapsed)"),
+    package_version => "2*",
     package_policy => "add",
     package_method => yum_ifelapsed;
 }
