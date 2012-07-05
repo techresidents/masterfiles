@@ -72,6 +72,7 @@ bundle agent app_mongrel2_conf(env)
 {
 classes:
  "sysgrp_cfengine" expression => classmatch("sysgrp_cfengine_.*");
+ "mongrel2_config_sqlite_valid" expression => isgreaterthan(filesize("$(globals.third_party_root)/app/mongrel2/config.sqlite"), 0)
 
 files:
     "$(globals.third_party_root)/app/mongrel2/."
@@ -96,6 +97,12 @@ files:
       comment => "Create mongrel2 tmp directory",
       action => if_elapsed("$(globals.default_ifelapsed)"),
       perms => mog("755", "$(globals.default_user)", "$(globals.default_group)"),
+      create => "true";
+
+    "$(globals.third_party_root)/app/mongrel2/config.sqlite"
+      comment => "Create empty config sqlite",
+      action => if_elapsed("$(globals.default_ifelapsed)"),
+      perms => mog("600", "$(globals.default_user)", "$(globals.default_group)"),
       create => "true";
 
     "$(globals.third_party_root)/app/mongrel2/mongrel2.conf.template"
@@ -129,9 +136,7 @@ files:
       depth_search => recurse("inf");
 
 commands:
-  #only auto-restart mongrel2 for localdev environment
-  #it's too risky in other environments.
-  sysgrp_cfengine.sysver_mongrel2_localdev.mongrel2_conf_repaired::
+  sysgrp_cfengine.(!mongrel2_config_sqlite_valid | mongrel2_conf_repaired)::
 
     #The cmd_repair classes are necessary to ensure that the command will be executed.
     #If unique classes are not given and the same command has already been executed in
@@ -142,6 +147,14 @@ commands:
       action => if_elapsed(1),
       classes => cmd_repair("app_mongrel2_conf_load", "app_mongrel2_conf_load");
 
+  #only auto-restart mongrel2 for localdev environment
+  #it's too risky in other environments.
+  sysgrp_cfengine.sysver_mongrel2_localdev.mongrel2_conf_repaired::
+
+    #The cmd_repair classes are necessary to ensure that the command will be executed.
+    #If unique classes are not given and the same command has already been executed in
+    #a previous promise, cfengine will optimize away the execution. This makes no sense,
+    #but this is a work around until we get an explanation from CF.
     "$(globals.third_party_root)/app/mongrel2/bin/restart"
       contain => mongrel2_start_contain,
       action => if_elapsed(1),
@@ -151,6 +164,7 @@ commands:
 body contain mongrel2_contain
 {
 exec_owner => "$(globals.default_user)";
+exec_group => "$(globals.default_group)";
 useshell => "true";
 chdir => "$(globals.third_party_root)/app/mongrel2";
 }
@@ -158,6 +172,7 @@ chdir => "$(globals.third_party_root)/app/mongrel2";
 body contain mongrel2_start_contain
 {
 exec_owner => "root";
+exec_group => "root";
 useshell => "false";
 chdir => "$(globals.third_party_root)/app/mongrel2";
 }
