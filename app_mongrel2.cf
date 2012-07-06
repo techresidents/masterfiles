@@ -173,7 +173,7 @@ body contain mongrel2_start_contain
 {
 exec_owner => "root";
 exec_group => "root";
-useshell => "false";
+useshell => "true";
 chdir => "$(globals.third_party_root)/app/mongrel2";
 }
 

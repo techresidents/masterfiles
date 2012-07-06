@@ -81,6 +81,12 @@ classes:
  "sysgrp_cfengine" expression => classmatch("sysgrp_cfengine_.*");
 
 files:
+    "/var/zookeeper/."
+      comment => "Create /var/zookeeper directory",
+      action => if_elapsed(1),
+      perms => mog("755", "root", "root"),
+      create => "true";
+
     "$(globals.third_party_root)/app/zookeeper/conf/zoo.cfg"
       comment => "Install zookeeper configuration zoo.cfg",
       classes => if_repaired("zookeeper_conf_repaired"),
