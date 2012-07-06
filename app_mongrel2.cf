@@ -72,7 +72,7 @@ bundle agent app_mongrel2_conf(env)
 {
 classes:
  "sysgrp_cfengine" expression => classmatch("sysgrp_cfengine_.*");
- "mongrel2_config_sqlite_valid" expression => isgreaterthan(filesize("$(globals.third_party_root)/app/mongrel2/config.sqlite"), 0)
+ "mongrel2_config_sqlite_valid" expression => isgreaterthan(filesize("$(globals.third_party_root)/app/mongrel2/config.sqlite"), 0);
 
 files:
     "$(globals.third_party_root)/app/mongrel2/."
@@ -136,7 +136,7 @@ files:
       depth_search => recurse("inf");
 
 commands:
-  sysgrp_cfengine.(!mongrel2_config_sqlite_valid | mongrel2_conf_repaired)::
+  sysgrp_cfengine.(!mongrel2_config_sqlite_valid|mongrel2_conf_repaired)::
 
     #The cmd_repair classes are necessary to ensure that the command will be executed.
     #If unique classes are not given and the same command has already been executed in
