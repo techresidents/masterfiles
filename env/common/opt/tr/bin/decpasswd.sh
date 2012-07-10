@@ -18,4 +18,4 @@ encrypted_password_file=$1
 encryption_key_file=$2
 
 password=$(openssl enc -d -aes-256-cbc -nosalt -in $encrypted_password_file -pass file:$encryption_key_file)
-echo $password
+echo -n $password
