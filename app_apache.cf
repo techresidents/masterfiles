@@ -90,7 +90,7 @@ files:
       action => if_elapsed("$(globals.default_ifelapsed)"),
       copy_from => remote_dcp("$(globals.masterfiles)/env/$(env)/apache/ssl/ssl.pwd", "$(sys.policy_hub)");
 
-    "$/etc/httpd/conf/ssl.pwd.key"
+    "/etc/httpd/conf/ssl.pwd.key"
       comment => "Install ssl cert key password encryption key",
       perms => mog("400", "root", "root"),
       action => if_elapsed("$(globals.default_ifelapsed)"),
