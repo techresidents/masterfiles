@@ -83,16 +83,57 @@ files:
       classes => if_repaired("apache_conf_repaired"),
       action => if_elapsed("$(globals.default_ifelapsed)"),
       copy_from => remote_dcp("$(globals.masterfiles)/env/$(env)/apache/conf.d/$(web_site).conf", "$(sys.policy_hub)");
- 
- 
+
+    "$(web_root)/$(web_site)/ssl/$(web_site).pem.crt"
+      comment => "Install ssl cert",
+      perms => mog("400", "root", "root"),
+      action => if_elapsed("$(globals.default_ifelapsed)"),
+      copy_from => remote_dcp("$(globals.masterfiles)/env/$(env)/apache/ssl/$(web_site).pem.crt", "$(sys.policy_hub)"),
+
+    "$(web_root)/$(web_site)/ssl/$(web_site).pem.key"
+      comment => "Install ssl cert key",
+      perms => mog("400", "root", "root"),
+      action => if_elapsed("$(globals.default_ifelapsed)"),
+      copy_from => remote_dcp("$(globals.masterfiles)/env/$(env)/apache/ssl/$(web_site).pem.key", "$(sys.policy_hub)"),
+
+    "$(web_root)/$(web_site)/ssl/$(web_site).pwd"
+      comment => "Install encrypted ssl cert key password",
+      perms => mog("400", "root", "root"),
+      action => if_elapsed("$(globals.default_ifelapsed)"),
+      copy_from => remote_dcp("$(globals.masterfiles)/env/$(env)/apache/ssl/$(web_site).pwd", "$(sys.policy_hub)"),
+
+    "$(web_root)/$(web_site)/ssl/$(web_site).pwd.key"
+      comment => "Install ssl cert key password encryption key",
+      perms => mog("400", "root", "root"),
+      action => if_elapsed("$(globals.default_ifelapsed)"),
+      copy_from => remote_dcp("$(globals.masterfiles)/env/$(env)/apache/ssl/$(web_site).pwd.key", "$(sys.policy_hub)"),
+
+
   #if localdev host and environment is set to localdev additionally configure the following
   localdev.is_localdev::
-    "$(web_root)/localdev.com/ssl"
-      comment => "Install localdev ssl certs",
-      perms => mog("600", "root", "root"),
+    "$(web_root)/localdev.com/ssl/localdev.com.pem.crt"
+      comment => "Install localdev ssl cert",
+      perms => mog("400", "root", "root"),
       action => if_elapsed("$(globals.default_ifelapsed)"),
-      copy_from => remote_dcp("$(globals.masterfiles)/env/localdev/apache/ssl", "$(sys.policy_hub)"),
-      depth_search => recurse("inf");
+      copy_from => remote_dcp("$(globals.masterfiles)/env/localdev/apache/ssl/localdev.com.pem.crt", "$(sys.policy_hub)"),
+
+    "$(web_root)/localdev.com/ssl/localdev.com.pem.key"
+      comment => "Install localdev ssl cert key",
+      perms => mog("400", "root", "root"),
+      action => if_elapsed("$(globals.default_ifelapsed)"),
+      copy_from => remote_dcp("$(globals.masterfiles)/env/localdev/apache/ssl/localdev.com.pem.key", "$(sys.policy_hub)"),
+
+    "$(web_root)/localdev.com/ssl/localdev.com.pwd"
+      comment => "Install localdev encrypted ssl cert key password",
+      perms => mog("400", "root", "root"),
+      action => if_elapsed("$(globals.default_ifelapsed)"),
+      copy_from => remote_dcp("$(globals.masterfiles)/env/localdev/apache/ssl/localdev.com.pwd", "$(sys.policy_hub)"),
+
+    "$(web_root)/localdev.com/ssl/localdev.com.pwd.key"
+      comment => "Install localdev ssl cert key password encryption key",
+      perms => mog("400", "root", "root"),
+      action => if_elapsed("$(globals.default_ifelapsed)"),
+      copy_from => remote_dcp("$(globals.masterfiles)/env/localdev/apache/ssl/localdev.com.pwd.key", "$(sys.policy_hub)"),
 
     "$(web_root)/localdev.com/localdev/."
       comment => "Create localdev.com localdev env directory",
