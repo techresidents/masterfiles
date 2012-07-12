@@ -4,7 +4,12 @@
         "groups" : ["all", "cfengine", "ntp", "web", "services", "database", "zookeeper", "riak"]
     },
 
-    "vps-1070874-5615.manage.myhosting.com" : {
+    "admin1" : {
+        "envs" : ["prod"],
+        "groups" : ["all"]
+    },
+
+    "web1" : {
         "envs" : ["prod"],
         "groups" : ["all", "cfengine", "web", "services", "database", "zookeeper", "riak"]
     }
