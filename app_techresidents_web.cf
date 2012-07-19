@@ -101,6 +101,12 @@ files:
       action => if_elapsed("$(globals.default_ifelapsed)"),
       copy_from => remote_dcp("$(globals.masterfiles)/env/$(env)/apache/ssl/$(web_site).pem.key", "$(sys.policy_hub)");
 
+    "$(web_root)/$(web_site)/$(env)/ssl/$(web_site).pem.ca-bundle"
+      comment => "Install ssl cert key",
+      perms => mog("400", "root", "root"),
+      action => if_elapsed("$(globals.default_ifelapsed)"),
+      copy_from => remote_dcp("$(globals.masterfiles)/env/$(env)/apache/ssl/$(web_site).pem.ca-bundle", "$(sys.policy_hub)");
+
 commands:
   #only auto-restart apache for localdev environment
   #it's too risky in other environments.
