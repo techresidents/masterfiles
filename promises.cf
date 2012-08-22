@@ -90,12 +90,13 @@ bundle common def
     "acl" slist => { 
                    "$(sys.policy_hub)",
 		   "108.59.254.187",
-	           "10.180.161.197",
-                   "5.0.0.0/8"
-                 #"$(sys.policy_hub)/16"  # Assume /16 LAN clients to start with
-                 #  "2001:700:700:3.*", 
-                 #  "217.77.34.18", 
-                 #  "217.77.34.19",
+	       "10.180.161.197",
+           "10.180.18.124",
+           "5.0.0.0/8"
+           #"$(sys.policy_hub)/16"  # Assume /16 LAN clients to start with
+           #  "2001:700:700:3.*", 
+           #  "217.77.34.18", 
+           #  "217.77.34.19",
                    },
        comment => "Define an acl for the machines to be granted accesses",
         handle => "common_def_vars_acl"; 
