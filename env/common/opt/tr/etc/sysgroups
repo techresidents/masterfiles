@@ -11,6 +11,10 @@
         "packages" : []
     },
 
+    "iptables" : {
+        "packages" : []
+    },
+
     "ntp" : {
         "packages" : []
     },

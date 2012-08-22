@@ -6,7 +6,7 @@
 
     "dev1" : {
         "envs" : ["integration"],
-        "groups" : ["all", "cfengine", "dev_web"]
+        "groups" : ["all", "cfengine", "iptables", "dev_web"]
     },
 
     "admin1" : {

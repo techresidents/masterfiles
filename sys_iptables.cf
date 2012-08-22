@@ -18,26 +18,17 @@ classes:
  "sysgrp_cfengine" expression => classmatch("sysgrp_cfengine_.*");
  "iptables" expression => classmatch("sysgrp_iptables_.*");
 
-packages:
-  sysgrp_cfengine.iptables::
-    "$(iptables_packages)"
-      comment => "Install iptables packages",
-      classes => if_repaired("iptables_installed"),        
-      action => if_elapsed("$(globals.default_ifelapsed)"),
-      package_policy => "add",
-      package_method => yum_ifelapsed;
-
 methods:
-  sysgrp_cfengine.sysver_iptables_localdev::
+  sysgrp_cfengine.sysgrp_iptables_localdev::
     "any" usebundle => sys_iptables_conf("localdev");
 
-  sysgrp_cfengine.sysver_iptables_integration::
+  sysgrp_cfengine.sysgrp_iptables_integration::
     "any" usebundle => sys_iptables_conf("integration");
 
-  sysgrp_cfengine.sysver_iptables_staging::
+  sysgrp_cfengine.sysgrp_iptables_staging::
     "any" usebundle => sys_iptables_conf("staging");
 
-  sysgrp_cfengine.sysver_iptables_prod::
+  sysgrp_cfengine.sysgrp_iptables_prod::
     "any" usebundle => sys_iptables_conf("prod");
 }
 
@@ -46,7 +37,6 @@ bundle agent sys_iptables_conf(env)
 {
 classes:
  "sysgrp_cfengine" expression => classmatch("sysgrp_cfengine_.*");
- "iptables_config_sqlite_valid" expression => isgreaterthan(filesize("$(globals.third_party_root)/sys/iptables/config.sqlite"), 0);
 
 files:
     "/etc/sysconfig/iptables.template"
