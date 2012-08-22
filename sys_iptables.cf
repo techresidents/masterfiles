@@ -1,0 +1,84 @@
+#Uncomment for testing: /var/cfengine/bin/cf-agent -K -I -f <full_path>
+#body common control {
+# bundlesequence => { "sys_iptables" };
+#
+# inputs => { 
+#            "cfengine_stdlib.cf", 
+#            "globals.cf",
+#            "sys_groups.cf"
+#           };
+#}
+
+bundle agent sys_iptables
+{
+
+vars:
+
+classes:
+ "sysgrp_cfengine" expression => classmatch("sysgrp_cfengine_.*");
+ "iptables" expression => classmatch("sysgrp_iptables_.*");
+
+packages:
+  sysgrp_cfengine.iptables::
+    "$(iptables_packages)"
+      comment => "Install iptables packages",
+      classes => if_repaired("iptables_installed"),        
+      action => if_elapsed("$(globals.default_ifelapsed)"),
+      package_policy => "add",
+      package_method => yum_ifelapsed;
+
+methods:
+  sysgrp_cfengine.sysver_iptables_localdev::
+    "any" usebundle => sys_iptables_conf("localdev");
+
+  sysgrp_cfengine.sysver_iptables_integration::
+    "any" usebundle => sys_iptables_conf("integration");
+
+  sysgrp_cfengine.sysver_iptables_staging::
+    "any" usebundle => sys_iptables_conf("staging");
+
+  sysgrp_cfengine.sysver_iptables_prod::
+    "any" usebundle => sys_iptables_conf("prod");
+}
+
+
+bundle agent sys_iptables_conf(env)
+{
+classes:
+ "sysgrp_cfengine" expression => classmatch("sysgrp_cfengine_.*");
+ "iptables_config_sqlite_valid" expression => isgreaterthan(filesize("$(globals.third_party_root)/sys/iptables/config.sqlite"), 0);
+
+files:
+    "/etc/sysconfig/iptables.template"
+      comment => "Install iptables configuration template",
+      classes => if_repaired("iptables_conf_repaired"),
+      action => if_elapsed("$(globals.default_ifelapsed)"),
+      perms => mog("600", "root", "root"),
+      copy_from => remote_dcp("$(globals.masterfiles)/env/$(env)/etc/sysconfig/iptables.template", "$(sys.policy_hub)");
+
+    "/etc/sysconfig/iptables.test"
+      comment => "Install iptables configuration",
+      classes => if_repaired("iptables_conf_repaired"),
+      action => if_elapsed("$(globals.default_ifelapsed)"),
+      perms => mog("600", "root", "root"),
+      create => "true",
+      edit_defaults => iptables_edit_defaults,
+      edit_line => expand_template("/etc/sysconfig/iptables.template");
+
+commands:
+  sysgrp_cfengine.iptables_conf_repaired::
+
+    #The cmd_repair classes are necessary to ensure that the command will be executed.
+    #If unique classes are not given and the same command has already been executed in
+    #a previous promise, cfengine will optimize away the execution. This makes no sense,
+    #but this is a work around until we get an explanation from CF.
+    "service iptables restart"
+      contain => iptables_contain,
+      action => if_elapsed(1),
+      classes => cmd_repair("sys_iptables_conf_load", "sys_iptables_conf_load");
+}
+
+body edit_defaults iptables_edit_defaults
+{
+empty_file_before_editing => "true";
+}

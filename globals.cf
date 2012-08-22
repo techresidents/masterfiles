@@ -34,4 +34,20 @@ vars:
  "rpm_repo" string => "$(our_root)/centos/centos-5.7/rpm/repo";
  "source_profile" string => ". $(default_profile)";
  "source_3ps_profile" string => ". $(default_3ps_profile)";
+
+
+
+ "servers" slist => {
+     "admin1",
+     "dev1",
+     "web1",
+ };
+
+ "server_internal_ips[admin1]" string => "10.179.5.49";
+ "server_internal_ips[dev1]" string => "10.180.162.158";
+ "server_internal_ips[web1]" string => "10.180.161.197";
+
+ "server_public_ips[admin1]" string => "50.56.190.128";
+ "server_public_ips[dev1]" string => "198.101.250.199";
+ "server_public_ips[web1]" string => "198.101.223.117";
 }
