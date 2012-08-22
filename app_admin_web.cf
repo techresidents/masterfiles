@@ -53,7 +53,7 @@ files:
       comment => "Install admin web configuration",
       classes => if_repaired("app_admin_web_conf_repaired"),
       action => if_elapsed("$(globals.default_ifelapsed)"),
-      copy_from => remote_dcp("$(globals.masterfiles)/env/$(env)/apache/conf/admin.techresidents.conf", "$(sys.policy_hub)");
+      copy_from => remote_dcp("$(globals.masterfiles)/env/$(env)/apache/conf/admin.techresidents.com.conf", "$(sys.policy_hub)");
 
 commands:
   #only auto-restart apache for localdev environment
