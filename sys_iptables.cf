@@ -54,7 +54,8 @@ files:
       classes => if_repaired("iptables_conf_repaired"),
       action => if_elapsed("$(globals.default_ifelapsed)"),
       perms => mog("600", "root", "root"),
-      copy_from => remote_dcp("$(globals.masterfiles)/env/$(env)/etc/sysconfig/iptables.template", "$(sys.policy_hub)");
+      #copy_from => remote_dcp("$(globals.masterfiles)/env/$(env)/etc/sysconfig/iptables.template", "$(sys.policy_hub)");
+      copy_from => remote_dcp("$(globals.masterfiles)/env/common/etc/sysconfig/iptables.template", "$(sys.policy_hub)");
 
     "/etc/sysconfig/iptables.test"
       comment => "Install iptables configuration",
