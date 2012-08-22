@@ -4,6 +4,11 @@
         "groups" : ["all", "cfengine", "ntp", "web", "services", "database", "zookeeper", "riak"]
     },
 
+    "dev1" : {
+        "envs" : ["integration"],
+        "groups" : ["all", "cfegine", "dev_web"]
+    },
+
     "admin1" : {
         "envs" : ["prod"],
         "groups" : ["all"]

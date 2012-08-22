@@ -9,7 +9,7 @@
 #}
 
 #Execute the sysutil utility to determine which groups the host belongs and the following:
-# 1) Create classes of the form sysgrp_<group>   i.e. sysgrp_web or sysgrp_database
+# 1) Create classes of the form sysgrp_<group>_<env>  i.e. sysgrp_web_localdev or sysgrp_database_prod
 bundle agent sysgrp
 {
 vars:

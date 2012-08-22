@@ -23,6 +23,14 @@
         "packages" : ["apache", "techresidents_web", "mongrel2", "chatsvc"]
     },
 
+    "admin_web" : {
+        "packages" : ["apache"]
+    },
+
+    "dev_web" : {
+        "packages" : ["apache"]
+    },
+
     "database" : {
         "packages" : ["postgresql"]
     },

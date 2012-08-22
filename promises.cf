@@ -21,6 +21,8 @@ body common control
                     "app_zookeeper",
                     "app_riak",
                     "app_apache",
+                    "app_admin_web",
+                    "app_dev_web",
                     "app_techresidents_web",
                     "app_chatsvc",
                     "app_lookupsvc",
