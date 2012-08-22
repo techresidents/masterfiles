@@ -47,6 +47,8 @@ body common control
             "app_zookeeper.cf",
             "app_riak.cf",
             "app_apache.cf",     
+            "app_admin_web.cf",
+            "app_dev_web.cf",
             "app_techresidents_web.cf",
             "app_chatsvc.cf",
             "app_lookupsvc.cf",
