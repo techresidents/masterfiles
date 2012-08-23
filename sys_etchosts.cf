@@ -47,7 +47,7 @@ files:
       #copy_from => remote_dcp("$(globals.masterfiles)/env/$(env)/etc/hosts.template", "$(sys.policy_hub)");
       copy_from => remote_dcp("$(globals.masterfiles)/env/common/etc/hosts.template", "$(sys.policy_hub)");
 
-    "/etc/hosts.test"
+    "/etc/hosts"
       comment => "Install /etc/hosts configuration",
       classes => if_repaired("etchosts_conf_repaired"),
       action => if_elapsed("$(globals.default_ifelapsed)"),
