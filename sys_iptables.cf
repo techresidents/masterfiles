@@ -54,7 +54,7 @@ files:
       perms => mog("600", "root", "root"),
       create => "true",
       edit_defaults => empty,
-      edit_template => expand_template("/etc/sysconfig/iptables.template");
+      edit_template => "/etc/sysconfig/iptables.template";
 
 commands:
   sysgrp_cfengine.iptables_conf_repaired::

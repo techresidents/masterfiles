@@ -51,6 +51,6 @@ vars:
  
  #For convenience
  "servers" slist => getindices("server_internal_ips");
- "server_internal_ips_list" => getvalues("server_internal_ips");
- "server_public_ips_list" => getvalues("server_public_ips");
+ "server_internal_ips_list" slist => getvalues("server_internal_ips");
+ "server_public_ips_list" slist => getvalues("server_public_ips");
 }
