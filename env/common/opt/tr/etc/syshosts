@@ -16,6 +16,6 @@
 
     "web1" : {
         "envs" : ["prod"],
-        "groups" : ["all", "cfengine", "web", "services", "database", "zookeeper", "riak"]
+        "groups" : ["all", "cfengine", "iptables", "web", "services", "database", "zookeeper", "riak"]
     }
 }
