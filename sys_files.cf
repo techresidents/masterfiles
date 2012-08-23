@@ -53,14 +53,6 @@ files:
       copy_from => remote_dcp("$(globals.masterfiles)/env/common/etc/ld.so.conf.d", "$(sys.policy_hub)"),
       depth_search => recurse("inf");
 
-#Only configure /etc/hosts on prod machines
-  !sysgrp_opt_out.sysgrp_all_prod::
-    "/etc/hosts"
-      comment => "Sync /etc/hosts",
-      perms => mog("644", "root", "root"),
-      action => if_elapsed("$(globals.default_ifelapsed)"),
-      copy_from => remote_dcp("$(globals.masterfiles)/env/prod/etc/hosts", "$(sys.policy_hub)");
-
 
 #Non essential files should go below the following class check.
   sysgrp_cfengine::
