@@ -9,7 +9,7 @@
 #}
 
 #Execute the sysutil utility to determine which groups the host belongs and the following:
-# 1) Create classes of the form sysgrp_<group>_<env>  i.e. sysgrp_web_localdev or sysgrp_database_prod
+# 1) Create classes of the form sysgrp_<group> and sysgrp_<group>_<env>  i.e. sysgrp_web and sysgrp_web_prod
 bundle agent sysgrp
 {
 vars:
@@ -20,7 +20,7 @@ commands:
   #If unique classes are not given and the same command has already been executed in
   #a previous promise, cfengine will optimize away the execution. This makes no sense,
   #but this is a work around until we get an explanation from CF.
-  "$(globals.sysutil) --root $(globals.our_root)/etc groups -H localhost --format '+sysgrp_{group}_{env}'"
+  "$(globals.sysutil) --root $(globals.our_root)/etc groups -H localhost --format '+sysgrp_{group}\n+sysgrp_{group}_{env}'"
     classes => cmd_repair("$(sysgrp_unique)", "$(sysgrp_unique)"),
     module => "true";
 }

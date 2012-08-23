@@ -1,4 +1,4 @@
-[%CFEngine sys_iptables_iptables:: %]
+[%CFEngine sysgrp_iptables:: %]
 *filter
 :INPUT ACCEPT [0:0]
 :FORWARD ACCEPT [0:0]
@@ -14,17 +14,28 @@
 -A RH-Firewall-1-INPUT -p udp -m udp --dport 631 -j ACCEPT
 -A RH-Firewall-1-INPUT -p tcp -m tcp --dport 631 -j ACCEPT
 -A RH-Firewall-1-INPUT -m state --state ESTABLISHED,RELATED -j ACCEPT
--A RH-Firewall-1-INPUT -s $(globals.server_internal_ips[$(globals.servers)] -p tcp -m state --state NEW -m tcp --dport 22 -j ACCEPT 
--A RH-Firewall-1-INPUT -s $(globals.server_internal_ips[$(globals.servers)] -p tcp -m state --state NEW -m tcp --dport 80 -j ACCEPT 
--A RH-Firewall-1-INPUT -s $(globals.server_internal_ips[$(globals.servers)] -p tcp -m state --state NEW -m tcp --dport 443 -j ACCEPT 
--A RH-Firewall-1-INPUT -s $(globals.server_internal_ips[$(globals.servers)] -p tcp -m state --state NEW -m tcp --dport 5308 -j ACCEPT 
--A RH-Firewall-1-INPUT -s $(globals.server_internal_ips[$(globals.servers)] -p tcp -m state --state NEW -m tcp --dport 8000:12000 -j ACCEPT 
--A RH-Firewall-1-INPUT -s $(globals.server_public_ips[$(globals.servers)] -p tcp -m state --state NEW -m tcp --dport 22 -j ACCEPT 
-[%CFEngine sysgrp_iptables_localdev:: %]
-[%CFEngine sysgrp_iptables_integration:: %]
-[%CFEngine sysgrp_iptables_staging:: %]
-[%CFEngine sysgrp_iptables_prod:: %]
-[%CFEngine sys_iptables_iptables:: %]
+-A RH-Firewall-1-INPUT -s $(globals.server_internal_ips_list) -p tcp -m state --state NEW -m tcp --dport 22 -j ACCEPT 
+-A RH-Firewall-1-INPUT -s $(globals.server_internal_ips_list) -p tcp -m state --state NEW -m tcp --dport 80 -j ACCEPT 
+-A RH-Firewall-1-INPUT -s $(globals.server_internal_ips_list) -p tcp -m state --state NEW -m tcp --dport 443 -j ACCEPT 
+-A RH-Firewall-1-INPUT -s $(globals.server_internal_ips_list) -p tcp -m state --state NEW -m tcp --dport 2181 -j ACCEPT 
+-A RH-Firewall-1-INPUT -s $(globals.server_internal_ips_list) -p tcp -m state --state NEW -m tcp --dport 5308 -j ACCEPT 
+-A RH-Firewall-1-INPUT -s $(globals.server_internal_ips_list) -p tcp -m state --state NEW -m tcp --dport 5432 -j ACCEPT 
+-A RH-Firewall-1-INPUT -s $(globals.server_internal_ips_list) -p tcp -m state --state NEW -m tcp --dport 6767 -j ACCEPT 
+-A RH-Firewall-1-INPUT -s $(globals.server_internal_ips_list) -p tcp -m state --state NEW -m tcp --dport 8000:12000 -j ACCEPT 
+-A RH-Firewall-1-INPUT -s $(globals.server_public_ips_list) -p tcp -m state --state NEW -m tcp --dport 22 -j ACCEPT 
+-A RH-Firewall-1-INPUT -s $(globals.server_public_ips_list) -p tcp -m state --state NEW -m tcp --dport 80 -j ACCEPT 
+-A RH-Firewall-1-INPUT -s $(globals.server_public_ips_list) -p tcp -m state --state NEW -m tcp --dport 443 -j ACCEPT 
+-A RH-Firewall-1-INPUT -s $(globals.server_public_ips_list) -p tcp -m state --state NEW -m tcp --dport 2181 -j ACCEPT 
+-A RH-Firewall-1-INPUT -s $(globals.server_public_ips_list) -p tcp -m state --state NEW -m tcp --dport 5308 -j ACCEPT 
+-A RH-Firewall-1-INPUT -s $(globals.server_public_ips_list) -p tcp -m state --state NEW -m tcp --dport 5432 -j ACCEPT 
+-A RH-Firewall-1-INPUT -s $(globals.server_public_ips_list) -p tcp -m state --state NEW -m tcp --dport 6767 -j ACCEPT 
+-A RH-Firewall-1-INPUT -s $(globals.server_public_ips_list) -p tcp -m state --state NEW -m tcp --dport 8000:12000 -j ACCEPT 
+[%CFEngine sysver_techresidents_web:: %]
+-A RH-Firewall-1-INPUT -p tcp -m state --state NEW -m tcp --dport 8080 -j ACCEPT 
+-A RH-Firewall-1-INPUT -p tcp -m state --state NEW -m tcp --dport 8443 -j ACCEPT 
+[%CFEngine sysver_mongrel2:: %]
+-A RH-Firewall-1-INPUT -p tcp -m state --state NEW -m tcp --dport 6767 -j ACCEPT 
+[%CFEngine sysgrp_iptables:: %]
 -A RH-Firewall-1-INPUT -j REJECT --reject-with icmp-host-prohibited
 COMMIT
 

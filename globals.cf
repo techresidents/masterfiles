@@ -36,18 +36,21 @@ vars:
  "source_3ps_profile" string => ". $(default_3ps_profile)";
 
 
+ 
+ #New servers must be added to both the internal / public arrays.
 
- "servers" slist => {
-     "admin1",
-     "dev1",
-     "web1",
- };
-
+ #Internal
  "server_internal_ips[admin1]" string => "10.179.5.49";
  "server_internal_ips[dev1]" string => "10.180.162.158";
  "server_internal_ips[web1]" string => "10.180.161.197";
 
+ #Public
  "server_public_ips[admin1]" string => "50.56.190.128";
  "server_public_ips[dev1]" string => "198.101.250.199";
  "server_public_ips[web1]" string => "198.101.223.117";
+ 
+ #For convenience
+ "servers" slist => getindices("server_internal_ips");
+ "server_internal_ips_list" => getvalues("server_internal_ips");
+ "server_public_ips_list" => getvalues("server_public_ips");
 }

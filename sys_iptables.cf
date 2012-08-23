@@ -53,8 +53,8 @@ files:
       action => if_elapsed("$(globals.default_ifelapsed)"),
       perms => mog("600", "root", "root"),
       create => "true",
-      edit_defaults => iptables_edit_defaults,
-      edit_line => expand_template("/etc/sysconfig/iptables.template");
+      edit_defaults => empty,
+      edit_template => expand_template("/etc/sysconfig/iptables.template");
 
 commands:
   sysgrp_cfengine.iptables_conf_repaired::
@@ -63,13 +63,7 @@ commands:
     #If unique classes are not given and the same command has already been executed in
     #a previous promise, cfengine will optimize away the execution. This makes no sense,
     #but this is a work around until we get an explanation from CF.
-    "service iptables restart"
-      contain => iptables_contain,
+    "/sbin/service iptables restart"
       action => if_elapsed(1),
       classes => cmd_repair("sys_iptables_conf_load", "sys_iptables_conf_load");
-}
-
-body edit_defaults iptables_edit_defaults
-{
-empty_file_before_editing => "true";
 }
