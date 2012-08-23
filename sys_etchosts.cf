@@ -1,0 +1,63 @@
+#Uncomment for testing: /var/cfengine/bin/cf-agent -K -I -f <full_path>
+#body common control {
+# bundlesequence => { "sys_etchosts" };
+#
+# inputs => { 
+#            "cfengine_stdlib.cf", 
+#            "globals.cf",
+#            "sys_groups.cf"
+#           };
+#}
+
+bundle agent sys_etchosts
+{
+
+vars:
+
+classes:
+ "sysgrp_cfengine" expression => classmatch("sysgrp_cfengine_.*");
+ "etchosts" expression => classmatch("sysgrp_etchosts_.*");
+
+methods:
+  sysgrp_cfengine.sysgrp_etchosts_localdev::
+    "any" usebundle => sys_etchosts_conf("localdev");
+
+  sysgrp_cfengine.sysgrp_etchosts_integration::
+    "any" usebundle => sys_etchosts_conf("integration");
+
+  sysgrp_cfengine.sysgrp_etchosts_staging::
+    "any" usebundle => sys_etchosts_conf("staging");
+
+  sysgrp_cfengine.sysgrp_etchosts_prod::
+    "any" usebundle => sys_etchosts_conf("prod");
+}
+
+
+bundle agent sys_etchosts_conf(env)
+{
+classes:
+ "sysgrp_cfengine" expression => classmatch("sysgrp_cfengine_.*");
+
+files:
+    "/etc/hosts.template"
+      comment => "Install /etc/hosts configuration template",
+      classes => if_repaired("etchosts_conf_repaired"),
+      action => if_elapsed("$(globals.default_ifelapsed)"),
+      perms => mog("600", "root", "root"),
+      #copy_from => remote_dcp("$(globals.masterfiles)/env/$(env)/etc/hosts.template", "$(sys.policy_hub)");
+      copy_from => remote_dcp("$(globals.masterfiles)/env/common/etc/hosts.template", "$(sys.policy_hub)");
+
+    "/etc/hosts.test"
+      comment => "Install /etc/hosts configuration",
+      classes => if_repaired("etchosts_conf_repaired"),
+      action => if_elapsed("$(globals.default_ifelapsed)"),
+      perms => mog("600", "root", "root"),
+      create => "true",
+      edit_defaults => empty,
+      edit_template => "/etc/hosts.template";
+
+reports:
+  sysgrp_cfengine.etchosts_conf_repaired::
+    "/etc/hosts updated."
+      action => if_elapsed(1);
+}

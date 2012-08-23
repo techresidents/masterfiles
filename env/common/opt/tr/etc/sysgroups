@@ -11,6 +11,10 @@
         "packages" : []
     },
 
+    "etchosts" : {
+        "packages" : []
+    },
+
     "iptables" : {
         "packages" : []
     },

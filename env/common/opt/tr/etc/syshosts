@@ -6,12 +6,12 @@
 
     "dev1" : {
         "envs" : ["integration"],
-        "groups" : ["all", "cfengine", "iptables", "dev_web"]
+        "groups" : ["all", "cfengine", "etchosts", "iptables", "dev_web"]
     },
 
     "admin1" : {
         "envs" : ["prod"],
-        "groups" : ["all"]
+        "groups" : ["all", "cfengine"]
     },
 
     "web1" : {
