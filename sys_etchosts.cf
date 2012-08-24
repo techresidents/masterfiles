@@ -42,7 +42,7 @@ files:
     "/etc/hosts.template"
       comment => "Install /etc/hosts configuration template",
       classes => if_repaired("etchosts_conf_repaired"),
-      action => if_elapsed("$(globals.default_ifelapsed)"),
+      action => if_elapsed(1),
       perms => mog("644", "root", "root"),
       #copy_from => remote_dcp("$(globals.masterfiles)/env/$(env)/etc/hosts.template", "$(sys.policy_hub)");
       copy_from => remote_dcp("$(globals.masterfiles)/env/common/etc/hosts.template", "$(sys.policy_hub)");
@@ -50,8 +50,8 @@ files:
     "/etc/hosts"
       comment => "Install /etc/hosts configuration",
       classes => if_repaired("etchosts_conf_repaired"),
-      action => if_elapsed("$(globals.default_ifelapsed)"),
-      perms => mog("600", "root", "root"),
+      action => if_elapsed(1),
+      perms => mog("644", "root", "root"),
       create => "true",
       edit_defaults => empty,
       edit_template => "/etc/hosts.template";
