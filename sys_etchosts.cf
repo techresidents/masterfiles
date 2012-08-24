@@ -43,7 +43,7 @@ files:
       comment => "Install /etc/hosts configuration template",
       classes => if_repaired("etchosts_conf_repaired"),
       action => if_elapsed("$(globals.default_ifelapsed)"),
-      perms => mog("600", "root", "root"),
+      perms => mog("644", "root", "root"),
       #copy_from => remote_dcp("$(globals.masterfiles)/env/$(env)/etc/hosts.template", "$(sys.policy_hub)");
       copy_from => remote_dcp("$(globals.masterfiles)/env/common/etc/hosts.template", "$(sys.policy_hub)");
 
