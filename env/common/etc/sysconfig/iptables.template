@@ -39,10 +39,10 @@
 -A RH-Firewall-1-INPUT -s 5.0.0.0/8 -p tcp -m state --state NEW -m tcp --dport 6767 -j ACCEPT 
 -A RH-Firewall-1-INPUT -s 5.0.0.0/8 -p tcp -m state --state NEW -m tcp --dport 8000:12000 -j ACCEPT 
 [%CFEngine sysver_techresidents_web:: %]
--A RH-Firewall-1-INPUT -p tcp -m state --state NEW -m tcp --dport 8080 -j ACCEPT 
--A RH-Firewall-1-INPUT -p tcp -m state --state NEW -m tcp --dport 8443 -j ACCEPT 
+-A RH-Firewall-1-INPUT -p tcp -s 10.0.0.0/8 -m state --state NEW -m tcp --dport 8080 -j ACCEPT 
+-A RH-Firewall-1-INPUT -p tcp -s 10.0.0.0/8 -m state --state NEW -m tcp --dport 8443 -j ACCEPT 
 [%CFEngine sysver_mongrel2:: %]
--A RH-Firewall-1-INPUT -p tcp -m state --state NEW -m tcp --dport 6767 -j ACCEPT 
+-A RH-Firewall-1-INPUT -p tcp -s 10.0.0.0/8 -m state --state NEW -m tcp --dport 6767 -j ACCEPT 
 [%CFEngine sysgrp_iptables:: %]
 -A RH-Firewall-1-INPUT -j REJECT --reject-with icmp-host-prohibited
 COMMIT
