@@ -14,7 +14,7 @@ body common control
 
 body agent control
 {
- ifelapsed => "0";
+ ifelapsed => "1";
  skipidentify => "true";
 }
 
@@ -109,7 +109,7 @@ bundle agent update
    "$(inputs_dir)/cf_promises_validated"
         comment => "Check whether a validation stamp is available for a new policy update to reduce the distributed load",
          handle => "check_valid_update",
-      copy_from => u_dcp("$(master_location)/cf_promises_validated","$(sys.policy_hub)"),
+      copy_from => u_rcp("$(master_location)/cf_promises_validated","$(sys.policy_hub)"),
          action => u_immediate,
         classes => u_if_repaired("validated_updates_ready");
 
@@ -121,7 +121,7 @@ bundle agent update
          copy_from => u_rcp("$(master_location)","$(sys.policy_hub)"),
       depth_search => u_recurse("inf"),
       file_select  => u_input_files,
-        depends_on => { "grant_access_policy", "check_valid_update" },
+        depends_on => { "check_valid_update" },
             action => u_immediate,
            classes => u_if_repaired("update_report");
 
@@ -140,6 +140,14 @@ bundle agent update
              perms => u_m("644"),
       depth_search => u_recurse_basedir("inf"),
             action => u_immediate;
+
+   "$(sys.workdir)/lib"
+           comment => "Make sure cfengine libraries have right file permissions for only HP-UX",
+            handle => "update_files_sys_workdir_lib_hpux",
+             perms => u_m("755"),
+      depth_search => u_recurse_basedir("inf"),
+            action => u_immediate,
+        ifvarclass => "hpux";
 
    "/usr/local/sbin"
            comment => "Ensure cfengine binaries were copied to /usr/local/sbin",
@@ -191,20 +199,7 @@ body copy_from u_rcp(from,server)
 {
  source      => "$(from)";
  compare     => "digest";
- trustkey    => "true";
-
-!am_policy_hub::
-
- servers => { "$(server)" };
-}
-
-#########################################################
-
-body copy_from u_dcp(from,server)
-{
- source      => "$(from)";
- compare     => "mtime";
- trustkey    => "true";
+ trustkey    => "false";
 
 !am_policy_hub::
 
@@ -232,7 +227,7 @@ body action u_immediate
 body depth_search u_recurse(d)
 {
  depth => "$(d)";
- exclude_dirs => { "\.svn" };
+ exclude_dirs => { "\.svn", "\.git" };
 }
 
 #########################################################
@@ -241,7 +236,7 @@ body depth_search u_recurse_basedir(d)
 {
  include_basedir => "true";
  depth => "$(d)";
- exclude_dirs => { "\.svn" };
+ exclude_dirs => { "\.svn", "\.git" };
 }
 
 #########################################################

@@ -37,6 +37,7 @@ vars:
 	"createrepo",
 	"mkisofs",
 	"rpmdevtools",
+        "nc"
  };
 
 packages:

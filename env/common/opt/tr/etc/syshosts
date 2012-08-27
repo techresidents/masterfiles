@@ -4,8 +4,18 @@
         "groups" : ["all", "cfengine", "ntp", "web", "services", "database", "zookeeper", "riak"]
     },
 
-    "vps-1070874-5615.manage.myhosting.com" : {
+    "dev1" : {
+        "envs" : ["integration"],
+        "groups" : ["all", "cfengine", "etchosts", "iptables", "dev_web"]
+    },
+
+    "admin1" : {
         "envs" : ["prod"],
-        "groups" : ["all", "cfengine", "web", "services", "database", "zookeeper", "riak"]
+        "groups" : ["all", "cfengine", "etchosts"]
+    },
+
+    "web1" : {
+        "envs" : ["prod"],
+        "groups" : ["all", "cfengine", "etchosts", "iptables", "web", "services", "database", "zookeeper", "riak"]
     }
 }

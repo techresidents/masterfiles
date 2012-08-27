@@ -10,7 +10,7 @@
 
 #This common bundle will execute the sysutil to determine which packages are needed by this host
 #and do the following:
-# 1) Set classes of the form sysver_<package>_<env>  i.e. sysver_apache_localdev
+# 1) Set classes of the form sysver_<package> and sysver_<package>_<env>  i.e. sysver_apache and sysver_apache_localdev
 # 2) Create variables named python.<package>_<env>_version and python.<package>_<env>_release
 #
 
@@ -24,7 +24,7 @@ commands:
   #If unique classes are not given and the same command has already been executed in
   #a previous promise, cfengine will optimize away the execution. This makes no sense,
   #but this is a work around until we get an explanation from CF.
-  "$(globals.sysutil) --root $(globals.our_root)/etc packages -H localhost --format '+sysver_{package}_{env}\n={package}_{env}_version={version}\n={package}_{env}_release={release}'",
+  "$(globals.sysutil) --root $(globals.our_root)/etc packages -H localhost --format '+sysver_{package}\n+sysver_{package}_{env}\n={package}_{env}_version={version}\n={package}_{env}_release={release}'",
     classes => cmd_repair("$(sysver_unique)", "$(sysver_unique)"),
     module => "true";
 

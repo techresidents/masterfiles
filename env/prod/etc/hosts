@@ -1,0 +1,8 @@
+# Do not remove the following line, or various programs
+# that require network functionality will fail.
+127.0.0.1		centos62.rackspace.com centos62 localhost.localdomain localhost
+::1		localhost6.localdomain6 localhost6
+50.56.190.128	admin1
+10.179.5.49	admin1 admin1.lo
+10.180.161.197	web1
+198.101.223.117	web1 web1.lo

@@ -21,5 +21,5 @@
         SSLRequireSSL
     </Directory>
 
-    Include /opt/tr/www/techresidents.com/prod/techresidents_web/apache/integration.ssl.conf
+    Include /opt/tr/www/techresidents.com/integration/techresidents_web/apache/integration.ssl.conf
 </VirtualHost>

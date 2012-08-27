@@ -1,0 +1,70 @@
+#Uncomment for testing: /var/cfengine/bin/cf-agent -K -I -f <full_path>
+#body common control {
+# bundlesequence => { "app_dev_web" };
+#
+# inputs => { 
+#            "cfengine_stdlib.cf", 
+#            "globals.cf",
+#            "sys_groups.cf",
+#            "sys_repos.cf"
+#           };
+#}
+
+bundle agent app_dev_web
+{
+
+classes:
+ "sysgrp_cfengine" expression => classmatch("sysgrp_cfengine_.*");
+ "dev_web" expression => classmatch("sysgrp_dev_web_.*");
+
+methods:
+  sysgrp_cfengine.sysgrp_dev_web_localdev::
+    "any" usebundle => app_dev_web_conf("localdev");
+
+  sysgrp_cfengine.sysgrp_dev_web_integration::
+    "any" usebundle => app_dev_web_conf("integration");
+
+  sysgrp_cfengine.sysgrp_dev_web_staging::
+    "any" usebundle => app_dev_web_conf("staging");
+
+  sysgrp_cfengine.sysgrp_dev_web_prod::
+    "any" usebundle => app_dev_web_conf("prod");
+
+processes:
+  sysgrp_cfengine.dev_web::
+    "httpd"
+      comment => "Ensure httpd is running",
+      action => if_elapsed(1),
+      restart_class => "restart_httpd";
+
+commands:
+  sysgrp_cfengine.restart_httpd::
+    "/sbin/service httpd restart";	
+}
+
+bundle agent app_dev_web_conf(env)
+{
+classes:
+ "sysgrp_cfengine" expression => classmatch("sysgrp_cfengine_.*");
+  "is_localdev" expression => regcmp("localdev", "$(env)");
+
+files:
+    "/etc/httpd/conf.d/dev.techresidents.com.$(env).conf"
+      comment => "Install dev web configuration",
+      classes => if_repaired("app_dev_web_conf_repaired"),
+      action => if_elapsed("$(globals.default_ifelapsed)"),
+      copy_from => remote_dcp("$(globals.masterfiles)/env/$(env)/apache/conf.d/dev.techresidents.com.conf", "$(sys.policy_hub)");
+
+commands:
+  #only auto-restart apache for localdev environment
+  #it's too risky in other environments.
+  sysgrp_cfengine.sysver_dev_web_localdev.app_dev_web_conf_repaired::
+
+    #The cmd_repair classes are necessary to ensure that the command will be executed.
+    #If unique classes are not given and the same command has already been executed in
+    #a previous promise, cfengine will optimize away the execution. This makes no sense,
+    #but this is a work around until we get an explanation from CF.
+    "/sbin/service httpd restart"
+      action => if_elapsed(1),
+      classes => cmd_repair("app_dev_web_conf_restart", "app_dev_web_conf_restart");
+}

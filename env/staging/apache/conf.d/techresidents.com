@@ -21,5 +21,5 @@
         SSLRequireSSL
     </Directory>
 
-    Include /opt/tr/www/techresidents.com/prod/techresidents_web/apache/staging.ssl.conf
+    Include /opt/tr/www/techresidents.com/staging/techresidents_web/apache/staging.ssl.conf
 </VirtualHost>

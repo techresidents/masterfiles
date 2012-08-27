@@ -39,7 +39,7 @@
 # the online docs
 #
 
-# Subversion : $Rev: 84 $
+# Subversion : $Rev$
 # For Cfengine Core: 3.1.0
 
 ###################################################
@@ -179,6 +179,43 @@ insert_lines:
 
 ##
 
+bundle edit_line replace_line_end(start,end)
+#
+# Lines starting with "$(start)" will get the ending given in "$(end)",
+# whitespaces will be left unmodified.
+# For example, replace_line_end("ftp", "2121/tcp") would replace
+# "ftp             21/tcp"
+# with 
+# "ftp             2121/tcp"
+{
+field_edits:
+
+   "\s*$(start)\s.*"
+      edit_field => line("(^|\s)$(start)\s*", "2", "$(end)","set");
+}
+
+##
+
+bundle edit_line append_to_line_end(start,end)
+#
+# Lines starting with "$(start)" and not ending with "$(end)"
+# will get appended with "$(end)", whitespaces will be left unmodified.
+# For example, append_to_line_end("kernel", "vga=791") would replace
+# "kernel /boot/vmlinuz root=/dev/sda7"
+# with 
+# "kernel /boot/vmlinuz root=/dev/sda7 resume=/dev/sda9 vga=791"
+#
+# WARNING: Be careful not to have multiple promises matching the same line,
+#          which would result in the line growing indefinetively.
+{
+field_edits:
+
+   "\s*$(start)\s.*"
+      edit_field => line("(^|\s)$(start)\s*", "2", "$(end)","append");
+}
+
+##
+
 bundle edit_line resolvconf(search,list)
 
  # search is the search domains with space
@@ -238,41 +275,61 @@ insert_lines:
       ifvarclass => "!$(cindex[$(index)])_in_file";
 }
 
-##
+bundle edit_line set_config_values(v)
 
-bundle edit_line set_variable_values2(file,v)
-#
-# Another implementation of set_variable_values.
-# The input and output should be exactly the same (except the file name), 
-# but in some Cfengine versions there are bugs, 
-# so this bundle can be used as a workaround.
-#
+ # Sets the RHS of configuration items in the file of the form
+ #   LHS RHS
+ # If the line is commented out with #, it gets uncommented first.
+ # Adds a new line if none exists.
+ # The argument is the fully-qualified name of an associative array containing v[LHS]="rhs"
+
 {
 vars:
-
   "index" slist => getindices("$(v)");
 
   # Be careful if the index string contains funny chars
-
   "cindex[$(index)]" string => canonify("$(index)");
 
-  "fieldc_$(cindex[$(index)])" int => getfields("$(index).*","$(file)","=","FIELD_$(cindex[$(index)])");
-
-classes:
-  "$(cindex[$(index)])_in_file" expression => strcmp("$(index)=$($(v)[$(index)])", "$(FIELD_$(index)[1])=$(FIELD_$(index)[2])");
-
-
-delete_lines:  # delete any lhs when no match
-  "$(index)=.*",
-    ifvarclass => "!$(cindex[$(index)])_in_file";
-
+replace_patterns:
+  # If the line is there, maybe commented out, uncomment and replace with
+  # the correct value
+  "^\s*($(index)\s+(?!$($(v)[$(index)])).*|# ?$(index)\s+.*)$"
+    replace_with => value("$(index) $($(v)[$(index)])"),
+    classes => always("replace_attempted_$(cindex[$(index)])");
 
 insert_lines:
+  "$(index) $($(v)[$(index)])"
+    ifvarclass => "replace_attempted_$(cindex[$(index)])";
 
-  "$(index)=$($(v)[$(index)])",
+}
 
-         comment => "Insert a variable definition",
-      ifvarclass => "!$(cindex[$(index)])_in_file";
+bundle edit_line set_config_values_matching(v,pat)
+
+ # Sets the RHS of configuration items in the file of the form
+ #   LHS RHS
+ # If the line is commented out with #, it gets uncommented first.
+ # Adds a new line if none exists.
+ # Only elements of "v" that match the regex "pat" are used
+ # The argument is the fully-qualified name of an associative array containing v[LHS]="rhs"
+
+{
+vars:
+  "allparams" slist => getindices("$(v)");
+  "index"     slist => grep("$(pat)", "allparams");
+
+  # Be careful if the index string contains funny chars
+  "cindex[$(index)]" string => canonify("$(index)");
+
+replace_patterns:
+    # If the line is there, maybe commented out, uncomment and replace with
+    # the correct value
+    "^\s*($(index)\s+(?!$($(v)[$(index)])).*|# ?$(index)\s+.*)$"
+      replace_with => value("$(index) $($(v)[$(index)])"),
+      classes => always("replace_attempted_$(cindex[$(index)])");
+
+insert_lines:
+  "$(index) $($(v)[$(index)])"
+    ifvarclass => "replace_attempted_$(cindex[$(index)])";
 
 }
 
@@ -323,6 +380,22 @@ insert_lines:
          comment => "Append users into a group file format",
       ifvarclass => "add_$(index)";
 
+}
+
+##
+
+bundle edit_line set_colon_field(key,field,val)
+
+ # Set the value of field number "field" of the
+ # line whose first field is "key", in a colon-separated file.
+
+{
+field_edits:
+
+  "$(key):.*"
+
+       comment => "Edit a colon-separated file, using the first field as a key",
+     edit_field => col(":","$(field)","$(val)","set");
 }
 
 ##
@@ -378,6 +451,28 @@ insert_lines:
      expand_scalars => "true";
 }
 
+bundle edit_line replace_or_add(pattern,line)
+
+ # Replace a pattern in a file with a single line.
+ # If the pattern is not found, add the line to the file.
+ # The pattern must match the whole line (it is automatically
+ # anchored to the start and end of the line) to avoid
+ # ambiguity.
+
+{
+vars:
+  "cline" string => canonify("$(line)");
+
+replace_patterns:
+  "^(?!$(line)$)$(pattern)$"
+  replace_with => value("$(line)"),
+  classes => always("replace_done_$(cline)");
+
+insert_lines:
+  "$(line)"
+    ifvarclass => "replace_done_$(cline)";
+}
+
 ##
 
 bundle agent cronjob(commands,user,hours,mins)
@@ -397,15 +492,18 @@ vars:
 
 files:
 
+!windows::
   "$(crontab)/$(user)" 
 
     comment => "A user's regular batch jobs are added to this file",
      create => "true",
-     edit_line => append_if_no_line("$(mins) $(hours) * * * $(commands)"),
-     perms => mo("644","$(user)");
+  edit_line => append_if_no_line("$(mins) $(hours) * * * $(commands)"),
+      perms => mo("644","$(user)"),
+    classes => if_repaired("changed_crontab");
 
 processes:
 
+changed_crontab::
    "cron"
          comment => "Most crons need to be huped after file changes",
          signals => { "hup" };
@@ -442,6 +540,18 @@ extend_fields      => "true";
 allow_blank_fields => "true";
 }
 
+##
+
+body edit_field line(split,col,newval,method)
+{
+field_separator    => "$(split)";
+select_field       => "$(col)";
+value_separator    => " ";
+field_value        => "$(newval)";
+field_operation    => "$(method)";
+extend_fields      => "true";
+allow_blank_fields => "true";
+}
 
 ##
 
@@ -504,6 +614,15 @@ select_line_matching => "$(str)";
 }
 
 ##
+
+body location before(str)
+{
+before_after => "before";
+select_line_matching => "$(str)";
+}
+
+
+##
 ## replace_with
 ##
 
@@ -535,6 +654,14 @@ body action if_elapsed(x)
 {
 ifelapsed => "$(x)";
 expireafter => "$(x)";
+}
+
+##
+
+body action if_elapsed_day
+{
+ifelapsed => "1440";    # 60 x 24
+expireafter => "1400";
 }
 
 ##
@@ -595,6 +722,13 @@ log_string => "$(sys.date), $(message)";
 log_repaired => "$(log)";
 }
 
+###
+
+body action log_verbose
+{
+log_level => "verbose";
+}
+
 ##
 ## contain
 ##
@@ -632,6 +766,14 @@ no_output => "true";
 body contain in_shell
 {
 useshell => "true";
+}
+
+##
+
+body contain in_shell_bg
+{
+useshell => "true";
+background => "true";
 }
 
 ##
@@ -763,6 +905,20 @@ promise_kept => { "mXC_$(x)" };
 persist_time => "15";
 }
 
+##
+
+body classes always(x)
+
+# Define a class no matter what the outcome of the promise is
+
+{
+  promise_repaired => { "$(x)" };
+  promise_kept => { "$(x)" };
+  repair_failed => { "$(x)" };
+  repair_denied => { "$(x)" };
+  repair_timeout => { "$(x)" };
+}
+
 ###################################################
 # agent bundles
 ###################################################
@@ -824,6 +980,13 @@ body copy_from perms_cp(from)
 {
 source      => "$(from)";
 preserve    => "true";
+}
+
+body copy_from backup_local_cp(from)
+# Local copy, keeping a backup of old versions
+{
+  source      => "$(from)";
+  copy_backup => "timestamp";
 }
 
 ##
@@ -943,8 +1106,23 @@ owners => { "$(user)" };
 
 body acl access_generic(acl)
 # default/inherited ACLs are left unchanged,
-# applicable for both files and directory on all platforms
+# applicable for both files and directories on all platforms
 {
+acl_method => "overwrite";
+aces => { "@(acl)" };
+
+windows::
+acl_type => "ntfs";
+
+!windows::
+acl_type => "posix";
+}
+
+##
+
+body acl ntfs(acl)
+{
+acl_type => "ntfs";
 acl_method => "overwrite";
 aces => { "@(acl)" };
 }
@@ -980,6 +1158,13 @@ body depth_search recurse_ignore(d,list)
 {
 depth => "$(d)";
 exclude_dirs => { @(list) };
+}
+
+##
+
+body depth_search include_base
+{
+include_basedir => "true";
 }
 
 ##
@@ -1186,18 +1371,18 @@ package_name_convention => "$(name)";
 package_list_update_ifelapsed => "240";
 
 have_aptitude::
-   package_add_command => "/usr/bin/aptitude --assume-yes install";
+   package_add_command => "/usr/bin/env DEBIAN_FRONTEND=noninteractive LC_ALL=C /usr/bin/aptitude -o Dpkg::Options::=--force-confold -o Dpkg::Options::=--force-confdef --assume-yes install";
    package_list_update_command => "/usr/bin/aptitude update";
-   package_delete_command => "/usr/bin/aptitude --assume-yes remove";
-   package_update_command =>  "/usr/bin/aptitude --assume-yes install";
+   package_delete_command => "/usr/bin/env DEBIAN_FRONTEND=noninteractive LC_ALL=C /usr/bin/aptitude -o Dpkg::Options::=--force-confold -o Dpkg::Options::=--force-confdef --assume-yes -q remove";
+   package_update_command =>  "/usr/bin/env DEBIAN_FRONTEND=noninteractive LC_ALL=C /usr/bin/aptitude -o Dpkg::Options::=--force-confold -o Dpkg::Options::=--force-confdef --assume-yes install";
    package_verify_command =>  "/usr/bin/aptitude show";
    package_noverify_regex => "(State: not installed|E: Unable to locate package .*)";
 
 !have_aptitude::
-   package_add_command => "/usr/bin/apt-get --yes install";
+   package_add_command => "/usr/bin/env DEBIAN_FRONTEND=noninteractive LC_ALL=C /usr/bin/apt-get -o Dpkg::Options::=--force-confold -o Dpkg::Options::=--force-confdef --yes install";
    package_list_update_command => "/usr/bin/apt-get update";
-   package_delete_command => "/usr/bin/apt-get --yes remove";
-   package_update_command =>  "/usr/bin/apt-get --yes install";
+   package_delete_command => "/usr/bin/env DEBIAN_FRONTEND=noninteractive LC_ALL=C /usr/bin/apt-get -o Dpkg::Options::=--force-confold -o Dpkg::Options::=--force-confdef --yes -q remove";
+   package_update_command =>  "/usr/bin/env DEBIAN_FRONTEND=noninteractive LC_ALL=C /usr/bin/apt-get -o Dpkg::Options::=--force-confold -o Dpkg::Options::=--force-confdef --yes install";
    package_verify_command => "/usr/bin/dpkg -s";
    package_noverify_returncode => "1";
 }
@@ -1256,6 +1441,24 @@ package_add_command => "/bin/rpm -ivh ";
 package_update_command => "/bin/rpm -Uvh ";
 package_delete_command => "/bin/rpm -e --nodeps";
 package_noverify_regex => ".*[^\s].*";
+}
+
+##
+
+body package_method windows_feature
+{
+package_changes => "individual";
+
+package_name_convention   => "$(name)";
+package_delete_convention => "$(name)";
+
+package_installed_regex => ".*";
+package_list_name_regex => "(.*)";
+package_list_version_regex => "(.*)";  # FIXME: the listing does not give version, so takes name for version too now
+
+package_add_command    => "$(sys.winsysdir)\\WindowsPowerShell\\v1.0\\powershell.exe -Command \"Import-Module ServerManager; Add-WindowsFeature -Name\"";
+package_delete_command => "$(sys.winsysdir)\\WindowsPowerShell\\v1.0\\powershell.exe -Command \"Import-Module ServerManager; Remove-WindowsFeature -confirm:$false -Name\"";
+package_list_command   => "$(sys.winsysdir)\\WindowsPowerShell\\v1.0\\powershell.exe -Command \"Import-Module ServerManager; Get-WindowsFeature | where {$_.installed -eq $True} |foreach {$_.Name}\"";
 }
 
 ##
@@ -1320,7 +1523,7 @@ package_name_convention => "$(name).$(arch)";
 # set it to "0" to avoid caching of list during upgrade
 package_list_update_ifelapsed => "240";
 
-package_patch_installed_regex => "^\s.*";
+package_patch_installed_regex => "^[^*]\s.*";
 package_patch_name_regex    => "([^.]+).*";
 package_patch_version_regex => "[^\s]\s+([^\s]+).*";
 package_patch_arch_regex    => "[^.]+\.([^\s]+).*";
@@ -1354,7 +1557,10 @@ body package_method yum_rpm
   package_installed_regex => ".*";
   package_name_convention => "$(name)";
 
-  package_patch_installed_regex => "^\s.*";
+  # set it to "0" to avoid caching of list during upgrade
+  package_list_update_ifelapsed => "240";
+
+  package_patch_installed_regex => "^[^*]\s.*";
   package_patch_name_regex    => "([^.]+).*";
   package_patch_version_regex => "[^\s]\s+([^\s]+).*";
   package_patch_arch_regex    => "[^.]+\.([^\s]+).*";
@@ -1375,14 +1581,42 @@ body package_method solaris (pkgname, spoolfile, adminfile)
 {
 package_changes => "individual";
 package_list_command => "/usr/bin/pkginfo -l";
-package_multiline_start    =>  "\s*PKGINST:\s+[^\s]+";
-package_list_name_regex    => "\s*PKGINST:\s+([^\s]+)";
-package_list_version_regex => "\s*VERSION:\s+([^\s]+)";
+package_multiline_start    =>  "\s*PKGINST:\s+[^\s]+.*";
+package_list_name_regex    => "\s*PKGINST:\s+([^\s]+).*";
+package_list_version_regex => "\s*VERSION:\s+([^\s]+).*";
 package_list_arch_regex    => "\s*ARCH:\s+([^\s]+)";
 package_installed_regex => "\s*STATUS:\s*(completely|partially)\s+installed.*";
 package_name_convention => "$(name)";
 package_add_command => "/usr/sbin/pkgadd -n -a /tmp/$(adminfile) -d /tmp/$(spoolfile)";
 package_delete_command => "/usr/sbin/pkgrm -n -a /tmp/$(adminfile)";
+}
+
+##
+
+#
+# The following bundle is part of a package setup for solaris, see unit examples
+#
+
+bundle edit_line create_solaris_admin_file
+{
+insert_lines:
+		
+  "mail=
+instance=unique
+partial=nocheck
+runlevel=nocheck
+idepend=nocheck
+rdepend=nocheck
+space=nocheck
+setuid=nocheck
+conflict=nocheck
+action=nocheck
+networktimeout=60
+networkretries=3
+authentication=quit
+keystore=/var/sadm/security
+proxy=
+basedir=default";
 }
 
 ##
@@ -1437,21 +1671,39 @@ SuSE::
 
 redhat::
  package_changes => "bulk";
- package_list_command => "/usr/bin/yum list installed";
+ package_list_command => "/bin/rpm -qa --qf '%{name} %{version}-%{release} %{arch}\n'";
  package_patch_list_command => "/usr/bin/yum check-update";
- package_list_name_regex    => "([^.]+).*";
- package_list_version_regex => "[^\s]\s+([^\s]+).*";
- package_list_arch_regex    => "[^.]+\.([^\s]+).*";
- package_installed_regex => ".*(installed|\s+@).*";
- package_name_convention => "$(name).$(arch)";
- package_list_update_ifelapsed => "240";
+ package_list_name_regex    => "^(\S+?)\s\S+?\s\S+$";
+ package_list_version_regex => "^\S+?\s(\S+?)\s\S+$";
+ package_list_arch_regex    => "^\S+?\s\S+?\s(\S+)$";
+ package_installed_regex => ".*";
+ package_name_convention => "$(name)";
+ package_list_update_ifelapsed => "0";     # sometimes, caching is pretty disturbing
  package_patch_installed_regex => "^\s.*";
  package_patch_name_regex    => "([^.]+).*";
  package_patch_version_regex => "[^\s]\s+([^\s]+).*";
  package_patch_arch_regex    => "[^.]+\.([^\s]+).*";
- package_add_command => "/usr/bin/yum -y install";
- package_delete_command => "/bin/rpm -e --nodeps";
+ package_add_command    => "/usr/bin/yum -y install";
+ package_update_command => "/usr/bin/yum -y update";
+ package_delete_command => "/bin/rpm -e --nodeps --allmatches";
  package_verify_command => "/bin/rpm -V";
+
+# package_changes => "bulk";
+# package_list_command => "/usr/bin/yum list installed";
+# package_patch_list_command => "/usr/bin/yum check-update";
+# package_list_name_regex    => "([^.]+).*";
+# package_list_version_regex => "[^\s]\s+([^\s]+).*";
+# package_list_arch_regex    => "[^.]+\.([^\s]+).*";
+# package_installed_regex => ".*(installed|\s+@).*";
+# package_name_convention => "$(name).$(arch)";
+# package_list_update_ifelapsed => "240";
+# package_patch_installed_regex => "^\s.*";
+# package_patch_name_regex    => "([^.]+).*";
+# package_patch_version_regex => "[^\s]\s+([^\s]+).*";
+# package_patch_arch_regex    => "[^.]+\.([^\s]+).*";
+# package_add_command => "/usr/bin/yum -y install";
+# package_delete_command => "/bin/rpm -e --nodeps";
+# package_verify_command => "/bin/rpm -V";
 
 debian::
  package_changes => "bulk";
@@ -1463,18 +1715,18 @@ debian::
  package_list_update_ifelapsed => "240";		# 4 hours
 
 debian.have_aptitude::
-   package_add_command => "/usr/bin/aptitude --assume-yes install";
+   package_add_command => "/usr/bin/env DEBIAN_FRONTEND=noninteractive LC_ALL=C /usr/bin/aptitude -o Dpkg::Options::=--force-confold -o Dpkg::Options::=--force-confdef --assume-yes install";
    package_list_update_command => "/usr/bin/aptitude update";
-   package_delete_command => "/usr/bin/aptitude --assume-yes remove";
-   package_update_command =>  "/usr/bin/aptitude --assume-yes install";
+   package_delete_command => "/usr/bin/env DEBIAN_FRONTEND=noninteractive LC_ALL=C /usr/bin/aptitude -o Dpkg::Options::=--force-confold -o Dpkg::Options::=--force-confdef --assume-yes remove";
+   package_update_command =>  "/usr/bin/env DEBIAN_FRONTEND=noninteractive LC_ALL=C /usr/bin/aptitude -o Dpkg::Options::=--force-confold -o Dpkg::Options::=--force-confdef --assume-yes install";
    package_verify_command =>  "/usr/bin/aptitude show";
    package_noverify_regex => "(State: not installed|E: Unable to locate package .*)";
 
 debian.!have_aptitude::
-   package_add_command => "/usr/bin/apt-get --yes install";
+   package_add_command => "/usr/bin/env DEBIAN_FRONTEND=noninteractive LC_ALL=C /usr/bin/apt-get -o Dpkg::Options::=--force-confold -o Dpkg::Options::=--force-confdef --yes install";
    package_list_update_command => "/usr/bin/apt-get update";
-   package_delete_command => "/usr/bin/apt-get --yes remove";
-   package_update_command =>  "/usr/bin/apt-get --yes install";
+   package_delete_command => "/usr/bin/env DEBIAN_FRONTEND=noninteractive LC_ALL=C /usr/bin/apt-get -o Dpkg::Options::=--force-confold -o Dpkg::Options::=--force-confdef --yes remove";
+   package_update_command =>  "/usr/bin/env DEBIAN_FRONTEND=noninteractive LC_ALL=C /usr/bin/apt-get -o Dpkg::Options::=--force-confold -o Dpkg::Options::=--force-confdef --yes install";
    package_verify_command => "/usr/bin/dpkg -s";
    package_noverify_returncode => "1";
 
@@ -1490,6 +1742,8 @@ freebsd::
  package_add_command => "/usr/sbin/pkg_add -r";
  package_delete_command => "/usr/sbin/pkg_delete";
 }
+
+##
 
 ##-------------------------------------------------------
 ## storage promises
@@ -1590,6 +1844,151 @@ windows::
   service_type => "windows";
 }
 
+##
+
+bundle agent standard_services(service,state)
+{
+ # DATA, 
+
+vars:
+
+ linux::
+
+  "startcommand[varnish]" string => "/etc/init.d/varnish start";
+  "stopcommand[varnish]"  string => "/etc/init.d/varnish stop";
+  "pattern[varnish]"      string => ".*varnish.*";
+
+ suse|redhat::
+
+  "startcommand[www]" string => "/etc/init.d/apache2 start";
+  "stopcommand[www]"  string => "/etc/init.d/apache2 stop";
+  "pattern[www]"      string => ".*httpd.*";
+
+  "startcommand[mysql]" string => "/etc/init.d/mysqld start";
+  "stopcommand[mysql]"  string => "/etc/init.d/mysqld stop";
+  "pattern[mysql]"      string => ".*mysqld.*";
+
+  "startcommand[tomcat]" string => "/etc/init.d/tomcat5 start";
+  "stopcommand[tomcat]"  string => "/etc/init.d/tomcat5 stop";
+  "pattern[tomcat]"      string => ".*tomcat5.*";
+
+ debian|ubuntu::
+
+  "startcommand[www]"     string => "/etc/init.d/httpd stop";
+  "stopcommand[www]"      string => "/etc/init.d/httpd stop";
+  "pattern[www]"          string => ".*apache2.*";
+
+  "startcommand[mysql]" string => "/etc/init.d/mysql start";
+  "stopcommand[mysql]"  string => "/etc/init.d/mysql stop";
+  "pattern[mysql]"      string => ".*mysqld.*";
+
+  "startcommand[tomcat]" string => "/etc/init.d/tomcat6 start";
+  "stopcommand[tomcat]"  string => "/etc/init.d/tomcat6 stop";
+  "pattern[tomcat]"      string => ".*tomcat6.*";
+
+
+
+ # METHODS that implement these ............................................
+
+classes:
+
+  "start" expression => strcmp("start","$(state)"),
+             comment => "Check if to start a service";
+  "stop"  expression => strcmp("stop","$(state)"),
+             comment => "Check if to stop a service";
+
+# Do we want to include the packages here too?
+
+processes:
+
+  start::
+
+    "$(pattern)"
+
+             comment => "Verify that the service appears in the process table",
+       restart_class => "restart_$(service)";
+
+  stop::
+
+    "$(pattern)"
+
+            comment => "Verify that the service does not appear in the process",
+       process_stop => "$(stopcommand[$(service)])",
+            signals => { "term", "kill"};
+
+  commands:
+
+   "$(startcommand[$(service)])"
+
+            comment => "Execute command to restart the $(service) service",
+         ifvarclass => "restart_$(service)";
+
+}
+
+
+##
+## database promises
+##
+
+body database_server local_mysql(username, password)
+{
+db_server_owner => "$(username)";
+db_server_password => "$(password)";
+db_server_host => "localhost";
+db_server_type => "mysql";
+db_server_connection_db => "mysql";
+}
+
+##
+
+body database_server local_postgresql(username, password)
+{
+db_server_owner => "$(username)";
+db_server_password => "$(password)";
+db_server_host => "localhost";
+db_server_type => "postgres";
+db_server_connection_db => "postgres";
+}
+
+##
+## guest_environment promises
+##
+
+body environment_resources kvm(name, arch, cpu_count, mem_kb, disk_file)
+{
+env_spec =>
+"<domain type='kvm'>
+  <name>$(name)</name>
+  <memory>$(mem_kb)</memory>
+  <currentMemory>$(mem_kb)</currentMemory>
+  <vcpu>$(cpu_count)</vcpu>
+  <os>
+    <type arch='$(arch)'>hvm</type>
+  </os>
+  <features>
+    <acpi/>
+    <apic/>
+    <pae/>
+  </features>
+  <on_poweroff>destroy</on_poweroff>
+  <on_reboot>restart</on_reboot>
+  <on_crash>restart</on_crash>
+  <devices>
+    <emulator>/usr/bin/kvm</emulator>
+    <disk type='file' device='disk'>
+      <source file='$(disk_file)'/>
+      <target dev='vda' bus='virtio'/>
+    </disk>
+    <interface type='network'>
+      <source network='default'/>
+    </interface>
+    <input type='mouse' bus='ps2'/>
+    <graphics type='vnc' port='-1' autoport='yes'/>
+  </devices>
+</domain>";
+}
+
+
 ####################################################
 ## monitor bodyparts
 ####################################################
@@ -1602,9 +2001,16 @@ track_growing_file => "true";
 
 ##
 
+body match_value scan_changing_file(line)
+{
+select_line_matching => "$(line)";
+track_growing_file => "false";
+}
+
+##
+
 body action sample_rate(x)
 {
 ifelapsed => "$(x)";
 expireafter => "10";
 }
-

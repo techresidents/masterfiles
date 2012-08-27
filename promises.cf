@@ -10,6 +10,8 @@ body common control
                     "main",
                     "sysver",
                     "sysgrp",
+                    "sys_etchosts",
+                    "sys_iptables",
                     "sys_ntp",
                     "sys_garbage",
                     "sys_users",
@@ -21,6 +23,8 @@ body common control
                     "app_zookeeper",
                     "app_riak",
                     "app_apache",
+                    "app_admin_web",
+                    "app_dev_web",
                     "app_techresidents_web",
                     "app_chatsvc",
                     "app_lookupsvc",
@@ -33,6 +37,8 @@ body common control
             "globals.cf",
             "sys_versions.cf",
             "sys_groups.cf",
+            "sys_etchosts.cf",
+            "sys_iptables.cf",
             "sys_ntp.cf",
             "sys_garbage.cf",
             "sys_users.cf",
@@ -45,6 +51,8 @@ body common control
             "app_zookeeper.cf",
             "app_riak.cf",
             "app_apache.cf",     
+            "app_admin_web.cf",
+            "app_dev_web.cf",
             "app_techresidents_web.cf",
             "app_chatsvc.cf",
             "app_lookupsvc.cf",
@@ -60,7 +68,15 @@ body common control
 bundle agent main
 {
  reports:
-  cfengine_3::
+  am_policy_hub::
+   "--> I'm a policy hub."
+      comment => "Display message on screen/email",
+       handle => "main_reports_i_am_hub";
+
+  !am_policy_hub::
+   "--> $(sys.policy_hub) is my policy hub."
+      comment => "Display message on screen/email",
+       handle => "main_reports_is_my_hub";
    "--> CFE is running on $(sys.fqhost)"
       comment => "Display message on screen/email",
        handle => "main_reports_cfe_running";
@@ -86,13 +102,15 @@ bundle common def
   # List here the IP masks that we grant access to on the server
 
     "acl" slist => { 
-                   "$(sys.policy_hub)",
-		           "108.59.254.187",
-                   "5.0.0.0/8"
-                 #"$(sys.policy_hub)/16"  # Assume /16 LAN clients to start with
-                 #  "2001:700:700:3.*", 
-                 #  "217.77.34.18", 
-                 #  "217.77.34.19",
+        "$(sys.policy_hub)",
+        "108.59.254.187",
+        "10.180.161.197",
+        "10.180.162.158",
+        "5.0.0.0/8"
+        #"$(sys.policy_hub)/16"  # Assume /16 LAN clients to start with
+        #  "2001:700:700:3.*", 
+        #  "217.77.34.18", 
+        #  "217.77.34.19",
                    },
        comment => "Define an acl for the machines to be granted accesses",
         handle => "common_def_vars_acl"; 
@@ -121,7 +139,7 @@ body agent control
  any::
 
  # This should normally be set to an interval like 1-5 mins
- # We set it to zero initially to avoid confusion.
+ # We set it to one initially to avoid confusion.
 
   ifelapsed => "5";
 
@@ -135,6 +153,8 @@ body agent control
  debian::
   environment => { 
                   "DEBIAN_FRONTEND=noninteractive",
+#                  "APT_LISTBUGS_FRONTEND=none",
+#                  "APT_LISTCHANGES_FRONTEND=none",
                  };
 
 }
@@ -154,9 +174,10 @@ body server control
  allowallconnects      => { "127.0.0.1" , "::1", @(def.acl) };
  trustkeysfrom         => { "127.0.0.1" , "::1", @(def.acl) };
 
- skipverify            => { ".*$(def.domain)", "127.0.0.1" , "::1", @(def.acl) };
+ skipverify            => { ".*\.$(def.domain)", "127.0.0.1" , "::1", @(def.acl) };
 
  allowusers            => { "root" };
+ maxconnections        => "100";
 
 # Uncomment the line below to allow remote users to run 
 # cf-agent through cf-runagent
@@ -173,22 +194,30 @@ bundle server access_rules()
   any::
 
    "$(def.dir_masterfiles)"
-       handle => "server_access_grant_access_policy",
+       handle => "server_access_rule_grant_access_policy",
       comment => "Grant access to the policy updates",
-      admit   => { ".*$(def.domain)", @(def.acl) };
-   
+        admit => { ".*\.$(def.domain)", @(def.acl) };
+
    "$(globals.our_root)"
       comment => "Grant access to $(globals.our_root)",
       admit   => { ".*$(def.domain)", @(def.acl) };
+
+# Uncomment the promise below to allow cf-runagent to
+# access cf-agent on *NIX system
+
+   "$(sys.workdir)/bin/cf-agent"
+       handle => "server_access_rule_grant_access_cfagent_linux",
+      comment => "Grant access to cf-agent (for cf-runagent)",
+        admit => { ".*\.$(def.domain)", @(def.acl) };
 
 # Uncomment the promise below to allow cf-runagent to
 # access cf-agent on Windows machines
 #	
 #  "c:\program files\cfengine\bin\cf-agent.exe"
 #
-#    handle => "grant_access_policy_agent",
+#    handle => "server_access_rule_grant_access_cfagent_windows",
 #    comment => "Grant access to the agent (for cf-runagent)",
-#    admit   => { ".*$(def.domain)", @(def.acl) };	
+#    admit   => { ".*\.$(def.domain)", @(def.acl) };
 	
  roles:
 
@@ -208,11 +237,10 @@ bundle server access_rules()
 body executor control
 {
  any::
-  
-  #TODO properly configure cfengine email.
+
   splaytime  => "1";
   mailto     => "cfengine@$(def.domain)";
-  mailfrom   => "cfengine@$(sys.host).$(def.domain)";
+  mailfrom   => "cfengine@$(sys.host)\.$(def.domain)";
   smtpserver => "localhost";
 
 # Default:
