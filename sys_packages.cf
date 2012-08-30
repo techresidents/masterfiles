@@ -24,6 +24,9 @@ methods:
     "any" usebundle => sys_packages_devel_libevent;
     "any" usebundle => sys_packages_java;
     "any" usebundle => sys_packages_ours;
+ localdev::
+    "any" usebundle => sys_packages_ffmpeg;
+    "any" usebundle => sys_packages_sox;
 }
 
 bundle agent sys_packages_core
@@ -107,6 +110,30 @@ packages:
     package_policy => "add",
     package_version => "*",
     package_architectures => { "6.0-openjdk-devel.x86_64" },
+    package_method => yum_ifelapsed;
+}
+
+bundle agent sys_packages_ffmpeg
+{
+packages:
+  "ffmpeg"
+    comment => "Install ffmpeg",
+    action => if_elapsed("$(globals.default_ifelapsed)"),
+    package_policy => "add",
+    package_version => "0.11.1",
+    package_architectures => { "x86_64" },
+    package_method => yum_ifelapsed;
+}
+
+bundle agent sys_packages_sox
+{
+packages:
+  "sox"
+    comment => "Install sox",
+    action => if_elapsed("$(globals.default_ifelapsed)"),
+    package_policy => "add",
+    package_version => "14.3.2",
+    package_architectures => { "x86_64" },
     package_method => yum_ifelapsed;
 }
 
