@@ -130,9 +130,7 @@ vars:
     "zookeeper",
     "zookeeper-devel",
     "zookeeper-python-devel",
-    "cfengine-community",
-    "ffmpeg",
-    "sox"
+    "cfengine-community"
  };
 
 packages:
