@@ -128,8 +128,8 @@ packages:
 bundle agent sys_packages_sox
 {
 packages:
-  "sox"
-    comment => "Install sox",
+  "Sox"
+    comment => "Install Sox",
     action => if_elapsed("$(globals.default_ifelapsed)"),
     package_policy => "add",
     package_version => "14.3.2",
