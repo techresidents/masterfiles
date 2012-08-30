@@ -24,7 +24,6 @@ methods:
     "any" usebundle => sys_packages_devel_libevent;
     "any" usebundle => sys_packages_java;
     "any" usebundle => sys_packages_ours;
- localdev::
     "any" usebundle => sys_packages_ffmpeg;
     "any" usebundle => sys_packages_sox;
 }
