@@ -52,6 +52,8 @@ bundle agent sys_packages_devel
 {
 vars:
  "dev_packages" slist => {
+    "yasm",
+    "nasm",
 	"readline-devel",
 	"zlib-devel",
 	"gdbm-devel",
@@ -64,6 +66,7 @@ vars:
     "ncurses-devel",
     "tcl-devel",
     "postgresql91-devel",
+    "SDL-devel",
 	"git",
 	"subversion"
  };
@@ -127,7 +130,9 @@ vars:
     "zookeeper",
     "zookeeper-devel",
     "zookeeper-python-devel",
-    "cfengine-community"
+    "cfengine-community",
+    "ffmpeg",
+    "sox"
  };
 
 packages:
