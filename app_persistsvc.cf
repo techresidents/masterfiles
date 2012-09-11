@@ -1,0 +1,51 @@
+#Uncomment for testing: /var/cfengine/bin/cf-agent -K -I -f <full_path>
+#body common control {
+# bundlesequence => { "app_persistsvc" };
+#
+# inputs => { 
+#            "cfengine_stdlib.cf", 
+#            "globals.cf",
+#            "sys_versions.cf",
+#            "sys_repos.cf",
+#            "app_service.cf"
+#           };
+#}
+
+bundle agent app_persistsvc
+{
+
+vars:
+ "service_root" string => "$(globals.our_root)/services";
+ "service_data_root" string => "$(globals.our_root)/data";
+ "service" string => "persistsvc";
+ "service_arch" string => "x86_64";
+
+classes:
+ "sysgrp_cfengine" expression => classmatch("sysgrp_cfengine_.*");
+ "persistsvc" expression => classmatch("sysver_persistsvc_.*");
+
+methods:
+  sysgrp_cfengine.sysver_persistsvc_localdev::
+    "any" usebundle => sys_repo_sync("$(service)", "$(python.persistsvc_localdev_version)", "$(python.persistsvc_localdev_release)", "$(service_arch)");
+    "any" usebundle => sys_packages_rpm_multiversion("$(service)", "$(python.persistsvc_localdev_version)", "$(python.persistsvc_localdev_release)", "$(service_arch)");
+    "any" usebundle => app_service_conf("localdev", "$(service_root)", "$(service_data_root)", "$(service)", "$(python.persistsvc_localdev_version)");
+    "any" usebundle => app_service_run("localdev", "$(service_root)", "$(service_data_root)", "$(service)", "$(python.persistsvc_localdev_version)");
+
+  sysgrp_cfengine.sysver_persistsvc_integration::
+    "any" usebundle => sys_repo_sync("$(service)", "$(python.persistsvc_integration_version)", "$(python.persistsvc_integration_release)", "$(service_arch)");
+    "any" usebundle => sys_packages_rpm_multiversion("$(service)", "$(python.persistsvc_integration_version)", "$(python.persistsvc_integration_release)", "$(service_arch)");
+    "any" usebundle => app_service_conf("integration", "$(service_root)", "$(service_data_root)", "$(service)","$(python.persistsvc_integration_version)");
+    "any" usebundle => app_service_run("integration", "$(service_root)", "$(service_data_root)", "$(service)","$(python.persistsvc_integration_version)");
+
+  sysgrp_cfengine.sysver_persistsvc_staging::
+    "any" usebundle => sys_repo_sync("$(service)", "$(python.persistsvc_staging_version)", "$(python.persistsvc_staging_release)", "$(service_arch)");
+    "any" usebundle => sys_packages_rpm_multiversion("$(service)", "$(python.persistsvc_staging_version)", "$(python.persistsvc_staging_release)", "$(service_arch)");
+    "any" usebundle => app_service_conf("staging", "$(service_root)", "$(service_data_root)", "$(service)", "$(python.persistsvc_staging_version)");
+    "any" usebundle => app_service_run("staging", "$(service_root)", "$(service_data_root)", "$(service)", "$(python.persistsvc_staging_version)");
+
+  sysgrp_cfengine.sysver_persistsvc_prod::
+    "any" usebundle => sys_repo_sync("$(service)", "$(python.persistsvc_prod_version)", "$(python.persistsvc_prod_release)", "$(service_arch)");
+    "any" usebundle => sys_packages_rpm_multiversion("$(service)", "$(python.persistsvc_prod_version)", "$(python.persistsvc_prod_release)", "$(service_arch)");
+    "any" usebundle => app_service_conf("prod", "$(service_root)", "$(service_data_root)", "$(service)", "$(python.persistsvc_prod_version)");
+    "any" usebundle => app_service_run("prod", "$(service_root)", "$(service_data_root)", "$(service)", "$(python.persistsvc_prod_version)");
+}

@@ -29,6 +29,7 @@ body common control
                     "app_chatsvc",
                     "app_lookupsvc",
                     "app_schedulesvc",
+                    "app_persistsvc",
                     "app_mongrel2"
                    };
 
@@ -57,6 +58,7 @@ body common control
             "app_chatsvc.cf",
             "app_lookupsvc.cf",
             "app_schedulesvc.cf",
+            "app_persistsvc.cf",
             "app_mongrel2.cf"
            };
 

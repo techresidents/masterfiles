@@ -52,6 +52,6 @@
     },
 
     "services" : {
-        "packages" : ["lookupsvc", "schedulesvc"]
+        "packages" : ["lookupsvc", "schedulesvc", "persistsvc"]
     }
 }
