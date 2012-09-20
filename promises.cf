@@ -30,6 +30,8 @@ body common control
                     "app_lookupsvc",
                     "app_schedulesvc",
                     "app_persistsvc",
+                    "app_archivesvc",
+                    "app_notificationsvc",
                     "app_mongrel2"
                    };
 
@@ -59,6 +61,8 @@ body common control
             "app_lookupsvc.cf",
             "app_schedulesvc.cf",
             "app_persistsvc.cf",
+            "app_archivesvc.cf",
+            "app_notificationsvc.cf",
             "app_mongrel2.cf"
            };
 
