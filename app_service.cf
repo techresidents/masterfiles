@@ -23,6 +23,11 @@ files:
 
     "$(service_data_root)/."
       comment => "Create service data root directory",
+      perms => mog("755", "root", "root"),
+      create => "true";
+
+    "$(service_data_root)/$(service)/."
+      comment => "Create service data directory",
       perms => mog("755", "$(globals.default_user)", "$(globals.default_group)"),
       create => "true";
 
