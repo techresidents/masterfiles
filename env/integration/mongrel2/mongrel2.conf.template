@@ -11,11 +11,16 @@ chatsvc_handler = Handler(send_spec='tcp://0.0.0.0:9997',
                        send_ident='$(app_mongrel2.mongrel2_chatsvc_send_ident)',
                        recv_spec='tcp://0.0.0.0:9996', recv_ident='')
 
+apisvc_handler = Handler(send_spec='tcp://0.0.0.0:9991',
+                       send_ident='$(app_mongrel2.mongrel2_apisvc_send_ident)',
+                       recv_spec='tcp://0.0.0.0:9990', recv_ident='')
+
 # your main host
 localhost = Host(name="localhost", routes={
     '/static/': static_dir,
     '/chat/': chatsvc_handler,
-    '/lookup/': lookupsvc_handler
+    '/lookup/': lookupsvc_handler,
+    '/api/v1/': apisvc_handler
 })
 
 # the server to run them all
