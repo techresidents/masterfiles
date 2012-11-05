@@ -48,12 +48,12 @@ files:
 
     "$(service_root)/$(service)/$(env)/$(service)"
       comment => "Create web app symlink",
-      classes => if_repaired("service_conf_repaired"),
+      classes => if_repaired("$(service)_service_conf_repaired"),
       move_obstructions => "true",
       link_from => ln_service("$(service_root)/$(service)/install/$(service)-$(service_version)/$(service)");
 
 commands:
-  sysgrp_cfengine.service_conf_repaired::
+  sysgrp_cfengine::
     
     #The cmd_repair classes are necessary to ensure that the command will be executed.
     #If unique classes are not given and the same command has already been executed in
@@ -61,7 +61,8 @@ commands:
     #but this is a work around until we get an explanation from CF.
     "$(service_root)/$(service)/$(env)/$(service)/bin/restart $(env)"
       action => if_elapsed(1),
-      classes => cmd_repair("app_$(service)_$(env)_conf_restart", "app_$(service)_$(env)_conf_restart");
+      classes => cmd_repair("app_$(service)_$(env)_conf_restart", "app_$(service)_$(env)_conf_restart"),
+      ifvarclass => "$(service)_service_conf_repaired";
 }
 
 bundle agent app_service_run(env, service_root, service_data_root, service, service_version)

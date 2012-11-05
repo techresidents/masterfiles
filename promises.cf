@@ -32,6 +32,7 @@ body common control
                     "app_persistsvc",
                     "app_archivesvc",
                     "app_notificationsvc",
+                    "app_apisvc",
                     "app_mongrel2"
                    };
 
@@ -63,6 +64,7 @@ body common control
             "app_persistsvc.cf",
             "app_archivesvc.cf",
             "app_notificationsvc.cf",
+            "app_apisvc.cf",
             "app_mongrel2.cf"
            };
 
