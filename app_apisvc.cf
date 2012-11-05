@@ -1,0 +1,51 @@
+#Uncomment for testing: /var/cfengine/bin/cf-agent -K -I -f <full_path>
+#body common control {
+# bundlesequence => { "app_apisvc" };
+#
+# inputs => { 
+#            "cfengine_stdlib.cf", 
+#            "globals.cf",
+#            "sys_versions.cf",
+#            "sys_repos.cf",
+#            "app_service.cf"
+#           };
+#}
+
+bundle agent app_apisvc
+{
+
+vars:
+ "service_root" string => "$(globals.our_root)/services";
+ "service_data_root" string => "$(globals.our_root)/data";
+ "service" string => "apisvc";
+ "service_arch" string => "x86_64";
+
+classes:
+ "sysgrp_cfengine" expression => classmatch("sysgrp_cfengine_.*");
+ "apisvc" expression => classmatch("sysver_apisvc_.*");
+
+methods:
+  sysgrp_cfengine.sysver_apisvc_localdev::
+    "any" usebundle => sys_repo_sync("$(service)", "$(python.apisvc_localdev_version)", "$(python.apisvc_localdev_release)", "$(service_arch)");
+    "any" usebundle => sys_packages_rpm_multiversion("$(service)", "$(python.apisvc_localdev_version)", "$(python.apisvc_localdev_release)", "$(service_arch)");
+    "any" usebundle => app_service_conf("localdev", "$(service_root)", "$(service_data_root)", "$(service)", "$(python.apisvc_localdev_version)");
+    "any" usebundle => app_service_run("localdev", "$(service_root)", "$(service_data_root)", "$(service)", "$(python.apisvc_localdev_version)");
+
+  sysgrp_cfengine.sysver_apisvc_integration::
+    "any" usebundle => sys_repo_sync("$(service)", "$(python.apisvc_integration_version)", "$(python.apisvc_integration_release)", "$(service_arch)");
+    "any" usebundle => sys_packages_rpm_multiversion("$(service)", "$(python.apisvc_integration_version)", "$(python.apisvc_integration_release)", "$(service_arch)");
+    "any" usebundle => app_service_conf("integration", "$(service_root)", "$(service_data_root)", "$(service)","$(python.apisvc_integration_version)");
+    "any" usebundle => app_service_run("integration", "$(service_root)", "$(service_data_root)", "$(service)","$(python.apisvc_integration_version)");
+
+  sysgrp_cfengine.sysver_apisvc_staging::
+    "any" usebundle => sys_repo_sync("$(service)", "$(python.apisvc_staging_version)", "$(python.apisvc_staging_release)", "$(service_arch)");
+    "any" usebundle => sys_packages_rpm_multiversion("$(service)", "$(python.apisvc_staging_version)", "$(python.apisvc_staging_release)", "$(service_arch)");
+    "any" usebundle => app_service_conf("staging", "$(service_root)", "$(service_data_root)", "$(service)", "$(python.apisvc_staging_version)");
+    "any" usebundle => app_service_run("staging", "$(service_root)", "$(service_data_root)", "$(service)", "$(python.apisvc_staging_version)");
+
+  sysgrp_cfengine.sysver_apisvc_prod::
+    "any" usebundle => sys_repo_sync("$(service)", "$(python.apisvc_prod_version)", "$(python.apisvc_prod_release)", "$(service_arch)");
+    "any" usebundle => sys_packages_rpm_multiversion("$(service)", "$(python.apisvc_prod_version)", "$(python.apisvc_prod_release)", "$(service_arch)");
+    "any" usebundle => app_service_conf("prod", "$(service_root)", "$(service_data_root)", "$(service)", "$(python.apisvc_prod_version)");
+    "any" usebundle => app_service_run("prod", "$(service_root)", "$(service_data_root)", "$(service)", "$(python.apisvc_prod_version)");
+}
