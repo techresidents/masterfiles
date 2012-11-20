@@ -254,7 +254,7 @@
             "localdev" : {
                 "groups" : {
                     "all" : {
-                        "version" : "0.24.0",
+                        "version" : "0.25.0",
                         "release" : "1"
                     }
                 }
@@ -263,7 +263,7 @@
             "integration" : {
                 "groups" : {
                     "all" : {
-                        "version" : "0.24.0",
+                        "version" : "0.25.0",
                         "release" : "1"
                     }
                 }
@@ -272,7 +272,7 @@
             "staging" : {
                 "groups" : {
                     "all" : {
-                        "version" : "0.24.0",
+                        "version" : "0.25.0",
                         "release" : "1"
                     }
                 }
@@ -281,7 +281,7 @@
             "prod" : {
                 "groups" : {
                     "all" : {
-                        "version" : "0.24.0",
+                        "version" : "0.25.0",
                         "release" : "1"
                     }
                 }
