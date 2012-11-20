@@ -15,7 +15,8 @@ bundle agent app_service_conf(env, service_root, service_data_root, service, ser
 vars:
     #Old versions to remove (always keep the last 3 versions installed)
     "old_versions" string => execresult("/bin/ls -tr $(service_root)/$(service)/install | head -n-3", "useshell");
-    "old_versions_list" slist => splitstring("$(old_versions)", "\n", 20);
+    "tmp_old_versions_list" slist => splitstring("$(old_versions)", "\n", 20);
+    "old_versions_list" slist => grep("$(service).*", "tmp_old_versions_list");
 
 classes:
   "sysgrp_cfengine" expression => classmatch("sysgrp_cfengine_.*");
@@ -74,6 +75,10 @@ commands:
     "/bin/rpm"
         args => "-e --nodeps $(old_versions_list)",
         classes => cmd_repair("app_$(service)_$(env)_conf_remove_old", "app_$(service)_$(env)_conf_remove_old");
+
+    "/bin/rm"
+        args => "-rf $(service_root)/$(service)/install/$(old_versions_list)",
+        classes => cmd_repair("app_$(service)_$(env)_conf_rm_old", "app_$(service)_$(env)_conf_rm_old");
 }
 
 bundle agent app_service_run(env, service_root, service_data_root, service, service_version)
