@@ -71,7 +71,8 @@ commands:
 
   sysgrp_cfengine.localdev::        
     #Remove old verions of service
-    "/bin/rpm" args => "-e --nodeps $(old_versions_list)"
+    "/bin/rpm"
+        args => "-e --nodeps $(old_versions_list)",
         classes => cmd_repair("app_$(service)_$(env)_conf_remove_old", "app_$(service)_$(env)_conf_remove_old");
 }
 
