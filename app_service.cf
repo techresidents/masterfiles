@@ -70,7 +70,6 @@ commands:
       classes => cmd_repair("app_$(service)_$(env)_conf_restart", "app_$(service)_$(env)_conf_restart"),
       ifvarclass => "$(service)_service_conf_repaired";
 
-  sysgrp_cfengine.localdev::        
     #Remove old verions of service
     "/bin/rpm"
         args => "-e --nodeps $(old_versions_list)",

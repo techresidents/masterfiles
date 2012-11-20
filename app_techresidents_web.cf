@@ -60,7 +60,7 @@ commands:
   sysgrp_cfengine.restart_httpd::
     "/sbin/service httpd restart";	
 
-  sysgrp_cfengine.localdev::        
+  sysgrp_cfengine::
     #Remove old verions of service
     "/bin/rpm" args => "-e --nodeps $(old_versions_list)";
 
