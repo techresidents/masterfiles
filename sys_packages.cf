@@ -69,6 +69,7 @@ vars:
     "tcl-devel",
     "postgresql91-devel",
     "SDL-devel",
+    "libsndfile-devel",
 	"git",
 	"subversion"
  };
