@@ -1,7 +1,7 @@
 {
     "localdev" : {
         "envs" : ["localdev"],
-        "groups" : ["all", "cfengine", "ntp", "web", "services", "database", "zookeeper", "riak"]
+        "groups" : ["all", "cfengine", "ntp", "web", "services", "database", "zookeeper", "riak", "search"]
     },
 
     "dev1" : {

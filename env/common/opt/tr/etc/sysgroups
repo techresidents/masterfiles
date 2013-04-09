@@ -51,6 +51,10 @@
         "packages" : ["riak"]
     },
 
+    "search" : {
+        "packages" : ["elasticsearch"]
+    },
+
     "services" : {
         "packages" : ["lookupsvc", "schedulesvc", "persistsvc", "archivesvc", "notificationsvc", "apisvc"]
     }

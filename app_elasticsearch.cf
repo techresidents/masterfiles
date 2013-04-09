@@ -1,0 +1,141 @@
+#Uncomment for testing: /var/cfengine/bin/cf-agent -K -I -f <full_path>
+#body common control {
+# bundlesequence => { "app_elasticsearch" };
+#
+# inputs => { 
+#            "cfengine_stdlib.cf", 
+#            "globals.cf",
+#            "sys_versions.cf"
+#           };
+#}
+
+bundle agent app_elasticsearch
+{
+
+vars:
+ "elasticsearch_version" string => "0.20.6";
+
+ "elasticsearch_packages" slist => {
+	"elasticsearch"
+ };
+
+ "elasticsearch_up" string => execresult("$(globals.our_root)/bin/pidfile_proc_up.sh /var/elasticsearch/elasticsearch.pid elasticsearch", "noshell");
+
+classes:
+ "sysgrp_cfengine" expression => classmatch("sysgrp_cfengine_.*");
+ "elasticsearch" expression => classmatch("sysver_elasticsearch_.*");
+ "restart_elasticsearch" not => strcmp("$(elasticsearch_up)", "0"); 
+
+packages:
+  sysgrp_cfengine.elasticsearch::
+    "$(elasticsearch_packages)"
+      comment => "Install elasticsearch packages",
+      classes => if_repaired("elasticsearch_installed"),        
+      action => if_elapsed("$(globals.default_ifelapsed)"),
+      package_policy => "add",
+      package_method => yum_ifelapsed;
+
+methods:
+  sysgrp_cfengine.elasticsearch::
+    "any" usebundle => app_elasticsearch_symlink("$(elasticsearch_version)");
+    "any" usebundle => app_elasticsearch_extras();
+
+  sysgrp_cfengine.sysver_elasticsearch_localdev::
+    "any" usebundle => app_elasticsearch_conf("localdev");
+
+  sysgrp_cfengine.sysver_elasticsearch_integration::
+    "any" usebundle => app_elasticsearch_conf("integration");
+
+  sysgrp_cfengine.sysver_elasticsearch_staging::
+    "any" usebundle => app_elasticsearch_conf("staging");
+
+  sysgrp_cfengine.sysver_elasticsearch_prod::
+    "any" usebundle => app_elasticsearch_conf("prod");
+
+commands:
+  sysgrp_cfengine.elasticsearch.restart_elasticsearch::
+    #The cmd_repair classes are necessary to ensure that the command will be executed.
+    #If unique classes are not given and the same command has already been executed in
+    #a previous promise, cfengine will optimize away the execution. This makes no sense,
+    #but this is a work around until we get an explanation from CF.
+    "$(globals.third_party_root)/app/elasticsearch/bin/restart"
+      action => if_elapsed(1),
+      classes => cmd_repair("app_elasticsearch_restart", "app_elasticsearch_restart");
+}
+
+
+bundle agent app_elasticsearch_symlink(version)
+{
+files:
+    "$(globals.third_party_root)/app/elasticsearch"
+      comment => "Create elasticsearch symlink",
+      move_obstructions => "true",
+      link_from => ln_elasticsearch("$(globals.third_party_root)/app/elasticsearch-$(version)");
+}
+
+bundle agent app_elasticsearch_extras()
+{
+classes:
+ "sysgrp_cfengine" expression => classmatch("sysgrp_cfengine_.*");
+
+files:
+    "$(globals.third_party_root)/app/elasticsearch/bin"
+      comment => "Sync elasticsearch bin directory",
+      perms => mog("755", "root", "root"),
+      action => if_elapsed("$(globals.default_ifelapsed)"),
+      copy_from => remote_dcp("$(globals.masterfiles)/env/$(env)/elasticsearch/bin", "$(sys.policy_hub)"),
+      depth_search => recurse("inf");
+}
+
+
+bundle agent app_elasticsearch_conf(env)
+{
+classes:
+ "sysgrp_cfengine" expression => classmatch("sysgrp_cfengine_.*");
+
+files:
+    "/var/elasticsearch/."
+      comment => "Create /var/elasticsearch directory",
+      action => if_elapsed(1),
+      perms => mog("755", "root", "root"),
+      create => "true";
+
+    "/var/elasticsearch/data/."
+      comment => "Create /var/elasticsearch/data directory",
+      action => if_elapsed(1),
+      perms => mog("755", "root", "root"),
+      create => "true";
+
+    "/var/elasticsearch/log/."
+      comment => "Create /var/elasticsearch/log directory",
+      action => if_elapsed(1),
+      perms => mog("755", "root", "root"),
+      create => "true";
+
+    "$(globals.third_party_root)/app/elasticsearch/config"
+      comment => "Sync elasticsearch config directory",
+      perms => mog("644", "root", "root"),
+      action => if_elapsed("$(globals.default_ifelapsed)"),
+      copy_from => remote_dcp("$(globals.masterfiles)/env/$(env)/elasticsearch/config", "$(sys.policy_hub)"),
+      depth_search => recurse("inf");
+
+commands:
+  #only auto-restart elasticsearch for localdev environment
+  #it's too risky in other environments.
+  sysgrp_cfengine.sysver_elasticsearch_localdev.elasticsearch_conf_repaired::
+
+    #The cmd_repair classes are necessary to ensure that the command will be executed.
+    #If unique classes are not given and the same command has already been executed in
+    #a previous promise, cfengine will optimize away the execution. This makes no sense,
+    #but this is a work around until we get an explanation from CF.
+    "$(globals.third_party_root)/app/elasticsearch/bin/restart"
+      action => if_elapsed(1),
+      classes => cmd_repair("app_elasticsearch_conf_restart", "app_elasticsearch_conf_restart");
+}
+
+
+body link_from ln_elasticsearch(source)
+{
+  link_type => "symlink";
+  source => "$(source)";
+}
