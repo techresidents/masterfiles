@@ -38,7 +38,6 @@ packages:
 methods:
   sysgrp_cfengine.elasticsearch::
     "any" usebundle => app_elasticsearch_symlink("$(elasticsearch_version)");
-    "any" usebundle => app_elasticsearch_extras();
 
   sysgrp_cfengine.sysver_elasticsearch_localdev::
     "any" usebundle => app_elasticsearch_conf("localdev");
@@ -73,21 +72,6 @@ files:
       link_from => ln_elasticsearch("$(globals.third_party_root)/app/elasticsearch-$(version)");
 }
 
-bundle agent app_elasticsearch_extras()
-{
-classes:
- "sysgrp_cfengine" expression => classmatch("sysgrp_cfengine_.*");
-
-files:
-    "$(globals.third_party_root)/app/elasticsearch/bin"
-      comment => "Sync elasticsearch bin directory",
-      perms => mog("755", "root", "root"),
-      action => if_elapsed("$(globals.default_ifelapsed)"),
-      copy_from => remote_dcp("$(globals.masterfiles)/env/$(env)/elasticsearch/bin", "$(sys.policy_hub)"),
-      depth_search => recurse("inf");
-}
-
-
 bundle agent app_elasticsearch_conf(env)
 {
 classes:
@@ -111,6 +95,13 @@ files:
       action => if_elapsed(1),
       perms => mog("755", "root", "root"),
       create => "true";
+
+    "$(globals.third_party_root)/app/elasticsearch/bin"
+      comment => "Sync elasticsearch bin directory",
+      perms => mog("755", "root", "root"),
+      action => if_elapsed("$(globals.default_ifelapsed)"),
+      copy_from => remote_dcp("$(globals.masterfiles)/env/$(env)/elasticsearch/bin", "$(sys.policy_hub)"),
+      depth_search => recurse("inf");
 
     "$(globals.third_party_root)/app/elasticsearch/config"
       comment => "Sync elasticsearch config directory",

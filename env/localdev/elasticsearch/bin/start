@@ -2,7 +2,7 @@
 
 . /opt/3ps/etc/profile
 
-ELASTIC_SEARCH__HOME='/opt/3ps/app/elasticsearch'
+ELASTIC_SEARCH_HOME='/opt/3ps/app/elasticsearch'
 PIDFILE='/var/elasticsearch/elasticsearch.pid'
 $ELASTIC_SEARCH_HOME/bin/elasticsearch -Xmx768m -Xms768m -p $PIDFILE
 
