@@ -1,0 +1,4 @@
+#!/bin/bash
+/opt/3ps/app/elasticsearch/bin/stop
+sleep 2
+/opt/3ps/app/elasticsearch/bin/start

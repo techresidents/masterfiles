@@ -1,0 +1,10 @@
+#!/bin/bash
+. /opt/3ps/etc/profile
+
+PIDFILE='/var/elasticsearch/elasticsearch.pid'
+
+if [ -f $PIDFILE ]
+then
+    PID=`cat $PIDFILE`
+    kill $PID
+fi
