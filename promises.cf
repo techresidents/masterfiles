@@ -33,6 +33,7 @@ body common control
                     "app_archivesvc",
                     "app_notificationsvc",
                     "app_apisvc",
+                    "app_indexsvc",
                     "app_mongrel2",
                     "app_elasticsearch"
                    };
@@ -66,6 +67,7 @@ body common control
             "app_archivesvc.cf",
             "app_notificationsvc.cf",
             "app_apisvc.cf",
+            "app_indexsvc.cf",
             "app_mongrel2.cf",
             "app_elasticsearch.cf"
            };
