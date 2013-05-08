@@ -56,6 +56,6 @@
     },
 
     "services" : {
-        "packages" : ["lookupsvc", "schedulesvc", "persistsvc", "archivesvc", "notificationsvc", "apisvc"]
+        "packages" : ["lookupsvc", "schedulesvc", "persistsvc", "archivesvc", "notificationsvc", "apisvc", "indexsvc"]
     }
 }
