@@ -18,7 +18,7 @@ apisvc_handler = Handler(send_spec='tcp://0.0.0.0:9991',
 # your main host
 localhost = Host(name="localhost", routes={
     '/static/': static_dir,
-    '/chat/': chatsvc_handler,
+    '/chatsvc/': chatsvc_handler,
     '/lookup/': lookupsvc_handler,
     '/api/v1/': apisvc_handler
 })
