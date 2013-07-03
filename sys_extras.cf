@@ -47,7 +47,7 @@ commands:
     "$(globals.source_profile); $(globals.third_party_root)/bin/virtualenv --no-site-packages $(globals.our_root)/baseline-python2.7"
       contain => shell;
 
-  sysgrp_cfengine.(nodejs_rjs_needed::
+  sysgrp_cfengine.nodejs_rjs_needed::
     "$(globals.source_profile); $(globals.third_party_root)/bin/npm install -g requirejs@2.1.6"
       contain => shell;
 }
