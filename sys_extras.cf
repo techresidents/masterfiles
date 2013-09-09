@@ -31,16 +31,16 @@ commands:
     "$(globals.source_profile); /bin/sh setuptools-0.6c11-py2.7.egg --prefix=$(globals.third_party_root)"
       contain => shell;
 
-  sysgrp_cfengine.python_pip_needed::
-    "$(globals.source_profile); $(globals.third_party_root)/bin/easy_install pip==1.1"
+  sysgrp_cfengine.python_pip_needed|localdev::
+    "$(globals.source_profile); $(globals.third_party_root)/bin/easy_install pip==1.4.1"
       contain => shell;
 
-  sysgrp_cfengine.python_virtualenv_needed::
-    "$(globals.source_profile); $(globals.third_party_root)/bin/pip install virtualenv==1.7.2"
+  sysgrp_cfengine.python_virtualenv_needed|localdev::
+    "$(globals.source_profile); $(globals.third_party_root)/bin/pip install virtualenv==1.10.1"
       contain => shell;
 
-  sysgrp_cfengine.python_virtualenv_wrapper_needed::
-    "$(globals.source_profile); $(globals.third_party_root)/bin/pip install virtualenvwrapper==3.5"
+  sysgrp_cfengine.python_virtualenv_wrapper_needed|localdev::
+    "$(globals.source_profile); $(globals.third_party_root)/bin/pip install virtualenvwrapper==4.1.1"
       contain => shell;
 
   sysgrp_cfengine.python_baseline_needed::
